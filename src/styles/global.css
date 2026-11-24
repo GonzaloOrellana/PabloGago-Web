@@ -1,0 +1,131 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Bloqueo de scroll mientras el menú móvil está abierto (sin saltos al ocultar la barra) */
+html.menu-bloqueado {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html.menu-bloqueado body {
+  padding-right: var(--compensacion-scroll, 0px);
+}
+
+/* Compensa la navbar fija al navegar por anclas para que no tape el inicio de cada sección */
+/* Escritorio (≥ 1024 px): 20 px top + 60 px alto + 8 px aire */
+main > section[id]:not(#inicio),
+footer[id] {
+  scroll-margin-top: 88px;
+}
+
+/* Tablet (640–1023 px; ver --bp-tablet-max en tokens.css): 16 px top + 56 px alto + 8 px aire */
+@media (max-width: 1023px) {
+  main > section[id]:not(#inicio),
+  footer[id] {
+    scroll-margin-top: 80px;
+  }
+}
+
+/* Celular (< 640 px; ver --bp-celular-max en tokens.css): 14 px top + 52 px alto + 8 px aire */
+@media (max-width: 639px) {
+  main > section[id]:not(#inicio),
+  footer[id] {
+    scroll-margin-top: 74px;
+  }
+}
+
+body {
+  margin: 0;
+  overflow-x: clip;
+  font-family: var(--fuente-base);
+  font-weight: var(--peso-regular);
+  line-height: var(--interlineado-cuerpo);
+  color: var(--azul-noche);
+  background-color: var(--blanco);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+ul,
+ol {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+img,
+picture,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Entrada fade-up reutilizable (14 px, 0.9 s) */
+.fade-up {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+.is-visible .fade-up,
+.fade-up.is-visible {
+  animation: fade-up 0.9s var(--curva-animacion) var(--d, 0s) forwards;
+}
+
+@keyframes fade-up {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .fade-up,
+  .is-visible .fade-up,
+  .fade-up.is-visible {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

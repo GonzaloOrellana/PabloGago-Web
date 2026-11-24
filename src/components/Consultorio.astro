@@ -1,0 +1,343 @@
+---
+import { Image } from "astro:assets";
+import consultorioGimnasio from "../assets/images/consultorio-gimnasio.png";
+import consultorioCamilla from "../assets/images/consultorio-camilla.png";
+import consultorioSalaEspera from "../assets/images/consultorio-sala-espera.png";
+import consultorioCamillaRosa from "../assets/images/consultorio-camilla-rosa.png";
+
+const fotos = [
+  {
+    id: "gimnasio",
+    src: consultorioGimnasio,
+    alt: "Área de ejercicios y rehabilitación del consultorio con espaldera de madera, colchoneta azul, pelota de esferodinamia, espejo y grilla postural",
+    width: 1440,
+    widths: [480, 768, 1024, 1440],
+    // En tablet ocupa 50vw de ancho pero 108vw de alto (foto 3:4 → ancho útil ≈ 81vw)
+    sizes: "(max-width: 639px) 100vw, (max-width: 1023px) 81vw, 50vw",
+  },
+  {
+    id: "camilla",
+    src: consultorioCamilla,
+    alt: "Box de atención con camilla de kinesiología y mueble con equipos de fisioterapia y electroanalgesia",
+    width: 960,
+    widths: [320, 480, 720, 960],
+    // En tablet mide ~25vw × 54vw (foto 3:4 → ancho útil ≈ 40vw)
+    sizes: "(max-width: 639px) 50vw, (max-width: 1023px) 40vw, 25vw",
+  },
+  {
+    id: "sala",
+    src: consultorioSalaEspera,
+    alt: "Sala de espera del consultorio con sillas azules, rincón de café, vitrina y ambientación cálida",
+    width: 960,
+    widths: [320, 480, 720, 960],
+    sizes: "(max-width: 639px) 50vw, (max-width: 1023px) 40vw, 25vw",
+  },
+  {
+    id: "camilla-rosa",
+    src: consultorioCamillaRosa,
+    alt: "Box de atención con camilla tapizada en rosa, almohadones, espejo y estantería con insumos terapéuticos",
+    width: 1440,
+    widths: [480, 768, 1024, 1440],
+    // En tablet ocupa 50vw × 54vw; en escritorio 26vw × 100vh (ancho útil ≈ 75vh)
+    sizes: "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, max(26vw, 75vh)",
+  },
+];
+---
+
+<section
+  id="consultorio"
+  class="consultorio"
+  aria-labelledby="consultorio-titulo"
+  data-consultorio
+>
+  <h2 id="consultorio-titulo" class="visually-hidden">
+    El consultorio
+  </h2>
+
+  <div class="consultorio__grilla">
+    {fotos.map(({ id, src, alt, width, widths, sizes }) => (
+      <div class={`consultorio__celda consultorio__celda--${id}`}>
+        <Image
+          src={src}
+          alt={alt}
+          width={width}
+          widths={widths}
+          sizes={sizes}
+          format="webp"
+          loading="lazy"
+          decoding="async"
+          class={`consultorio__foto consultorio__foto--${id}`}
+        />
+      </div>
+    ))}
+  </div>
+
+  <!-- Sin JavaScript: todas las fotos visibles en su posición final -->
+  <noscript>
+    <style is:inline>
+      .consultorio__celda {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    </style>
+  </noscript>
+</section>
+
+<script>
+  const seccion = document.querySelector<HTMLElement>("[data-consultorio]");
+  const reducirMovimiento = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+
+  if (seccion) {
+    if (reducirMovimiento || !("IntersectionObserver" in window)) {
+      seccion.classList.add("is-visible");
+    } else {
+      // 20 % visible en viewports normales; protegido si la pantalla es muy baja en apaisado
+      const umbral = Math.min(
+        0.2,
+        (window.innerHeight * 0.5) / Math.max(seccion.offsetHeight, 1),
+      );
+      const observador = new IntersectionObserver(
+        (entradas) => {
+          if (entradas.some((e) => e.isIntersecting)) {
+            seccion.classList.add("is-visible");
+            observador.disconnect();
+          }
+        },
+        { threshold: umbral },
+      );
+      observador.observe(seccion);
+    }
+  }
+</script>
+
+<style>
+  .consultorio {
+    --curva-consultorio: cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    z-index: 2;
+    overflow: clip;
+    /* Base blanca opaca debajo del degradé para que --celeste-35 no mezcle con el canvas fijo */
+    background-color: var(--blanco);
+    background-image: linear-gradient(
+      180deg,
+      var(--celeste-35) 0%,
+      var(--celeste) 100%
+    );
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* ── Escritorio (proporción 630 / 310 / 332 con juntas de 4 px) ─────── */
+
+  .consultorio__grilla {
+    display: grid;
+    grid-template-columns: minmax(0, 630fr) minmax(0, 310fr) minmax(0, 332fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 4px;
+    width: 100%;
+    height: 100vh;
+    min-height: 640px;
+  }
+
+  .consultorio__celda {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateX(var(--dx, 0px));
+    transition:
+      opacity var(--duracion, 1.6s) var(--curva-consultorio) var(--retraso, 0s),
+      transform var(--duracion, 1.6s) var(--curva-consultorio)
+        var(--retraso, 0s);
+  }
+
+  .consultorio__celda--gimnasio {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    z-index: 1;
+    --dx: -120px;
+    --retraso: 0s;
+  }
+
+  .consultorio__celda--camilla {
+    grid-column: 2;
+    grid-row: 1;
+    --dx: -120px;
+    --retraso: 0s;
+  }
+
+  .consultorio__celda--sala {
+    grid-column: 2;
+    grid-row: 2;
+    --dx: 120px;
+    --retraso: 0s;
+  }
+
+  .consultorio__celda--camilla-rosa {
+    grid-column: 3;
+    grid-row: 1 / 3;
+    z-index: 1;
+    --dx: 120px;
+    --retraso: 0s;
+  }
+
+  .consultorio.is-visible .consultorio__celda {
+    opacity: 1;
+    transform: none;
+  }
+
+  .consultorio__foto {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s var(--curva-consultorio);
+  }
+
+  /* Encuadres ajustados contra las capturas de escritorio y celular */
+  .consultorio__foto--gimnasio {
+    object-position: 50% 50%;
+  }
+
+  .consultorio__foto--camilla {
+    object-position: 50% 55%;
+  }
+
+  .consultorio__foto--sala {
+    object-position: 45% 50%;
+  }
+
+  .consultorio__foto--camilla-rosa {
+    object-position: 70% 48%;
+  }
+
+  @media (hover: hover) and (min-width: 1024px) {
+    .consultorio__celda:hover .consultorio__foto {
+      transform: scale(1.03);
+    }
+  }
+
+  /* ── Tablet (640–1023 px; base 834 × 900 — ver tokens.css) ──────────── */
+
+  @media (min-width: 640px) and (max-width: 1023px) {
+    .consultorio__grilla {
+      /* En 834 px con gap 4 px: 415 | 205,5 | 205,5 (camilla rosa = 415) y filas de 448 + 448 = 900 */
+      grid-template-columns: minmax(0, 830fr) minmax(0, 411fr) minmax(0, 411fr);
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      height: clamp(690px, 107.914vw, 960px);
+      min-height: 0;
+    }
+
+    .consultorio__celda--gimnasio {
+      grid-column: 1;
+      grid-row: 1 / 3;
+      z-index: 1;
+      --dx: -96px;
+      --retraso: 0s;
+    }
+
+    .consultorio__celda--camilla-rosa {
+      grid-column: 2 / 4;
+      grid-row: 1;
+      z-index: 1;
+      --dx: 96px;
+      --retraso: 0s;
+    }
+
+    .consultorio__celda--camilla {
+      grid-column: 2;
+      grid-row: 2;
+      --dx: -96px;
+      --retraso: 0s;
+    }
+
+    .consultorio__celda--sala {
+      grid-column: 3;
+      grid-row: 2;
+      --dx: 96px;
+      --retraso: 0s;
+    }
+
+    .consultorio__foto--camilla-rosa {
+      object-position: 50% 52%;
+    }
+
+    .consultorio__foto--sala {
+      object-position: 50% 50%;
+    }
+  }
+
+  /* ── Celular (< 640 px; base 393 px — ver --bp-celular-max en tokens.css) ─ */
+
+  @media (max-width: 639px) {
+    .consultorio__grilla {
+      height: auto;
+      min-height: 0;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      /* 480 / 300 / 320 px en 393 px, escalando fluido hasta 820 px */
+      grid-template-rows:
+        clamp(420px, 259.1px + 56.21vw, 720px)
+        clamp(260px, 134.3px + 42.15vw, 480px)
+        clamp(270px, 99.1px + 56.21vw, 560px);
+    }
+
+    .consultorio__celda--gimnasio {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      --dx: -48px;
+      --duracion: 1.6s;
+      --retraso: 0s;
+    }
+
+    .consultorio__celda--camilla {
+      grid-column: 1;
+      grid-row: 2;
+      --dx: -48px;
+      --duracion: 1.6s;
+      --retraso: 0.15s;
+    }
+
+    .consultorio__celda--sala {
+      grid-column: 2;
+      grid-row: 2;
+      --dx: 48px;
+      --duracion: 1.6s;
+      --retraso: 0.15s;
+    }
+
+    .consultorio__celda--camilla-rosa {
+      grid-column: 1 / -1;
+      grid-row: 3;
+      --dx: 48px;
+      --duracion: 1.6s;
+      --retraso: 0.3s;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .consultorio__celda {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+
+    .consultorio__foto,
+    .consultorio__celda:hover .consultorio__foto {
+      transform: none;
+      transition: none;
+    }
+  }
+</style>

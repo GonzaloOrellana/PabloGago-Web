@@ -1,0 +1,17 @@
+
+> pablo-gago@0.0.1 dev
+> astro dev --port 4321
+
+{"message":"connected.","label":"vite","level":"info"}
+{"message":"Generated 3ms","label":"types","level":"info"}
+{"message":"connected.","label":"vite","level":"info"}
+{"message":" astro  v7.4.13 ready in 607 ms\n┃ Local    http://localhost:4321/\n┃ Network  use --host to expose","label":"SKIP_FORMAT","level":"info"}
+{"message":"watching for file changes...","label":null,"level":"info"}
+{"message":"[200] / 64ms","label":null,"level":"info"}
+{"message":"[200] / 5ms","label":null,"level":"info"}
+{"message":"[200] / 14ms","label":null,"level":"info"}
+{"message":"[200] /_image 498ms","label":null,"level":"info"}
+{"message":"[200] /_image 921ms","label":null,"level":"info"}
+{"message":"[200] / 12ms","label":null,"level":"info"}
+{"message":"[200] / 11ms","label":null,"level":"info"}
+{"message":"[200] / 6ms","label":null,"level":"info"}

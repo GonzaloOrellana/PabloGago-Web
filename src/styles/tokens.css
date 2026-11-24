@@ -1,0 +1,47 @@
+:root {
+  /* Colores */
+  --azul-noche: #102656;            /* textos, titulares, botones, fondos oscuros */
+  --azul-marca: #2557A4;            /* reservado (azul de la marca original) */
+  --celeste: #8FD3F4;               /* resplandor del hero, fondo de Propuesta */
+  --azul-suave: #B4CBF0;            /* borde del resplandor del hero */
+  --fondo-claro: #E8EDF6;           /* inicio del degradé de Testimonios */
+  --blanco: #FFFFFF;
+  --sombra: rgb(16 38 86 / 0.06);   /* sombra del navbar */
+  --texto-secundario: rgb(16 38 86 / 0.72);  /* párrafos sobre fondo claro */
+  --linea: rgb(16 38 86 / 0.14);    /* divisores sobre fondo claro */
+  --texto-claro-secundario: rgb(255 255 255 / 0.55); /* texto secundario sobre fondo oscuro */
+  --celeste-35: rgb(143 211 244 / 0.35); /* fin del degradé de Testimonios, inicio del de Consultorio */
+
+  /* Tipografía */
+  --fuente-base: var(--font-albert-sans), system-ui, sans-serif;
+  --peso-regular: 400;
+  --peso-medium: 500;
+  --peso-semibold: 600;
+  --tracking-titular: -0.03em;
+  --interlineado-titular: 1.06;
+  --interlineado-cuerpo: 1.5;
+
+  /* Espaciado y layout (24 px en 393 px · 48 px en 834 px · 72 px en 1280 px) */
+  --margen-x: clamp(1.5rem, 0.17rem + 5.41vw, 4.5rem);
+  --radio-pastilla: 9999px;
+
+  /* Breakpoints de referencia (en CSS los @media usan estos valores literales; JS puede leerlos acá)
+   * - Celular:    max-width: 639px                     (< 640 px · base 393 px)
+   * - Tablet:     min-width: 640px y max-width: 1023px (640–1023 px · base 834 px)
+   * - Escritorio: min-width: 1024px                    (≥ 1024 px · base 1280 px)
+   */
+  --bp-celular-max: 639px;
+  --bp-tablet-min: 640px;
+  --bp-tablet-max: 1023px;
+  --bp-escritorio-min: 1024px;
+
+  /* Animación (curva de la referencia Halden) */
+  --curva-animacion: cubic-bezier(0.22, 0.7, 0.2, 1);
+}
+
+/* Margen fluido de tablet (640–1023 px): pasa por 48 px exactos en 834 px */
+@media (min-width: 640px) and (max-width: 1023px) {
+  :root {
+    --margen-x: clamp(2rem, 0.1633rem + 5.4422vw, 3.75rem);
+  }
+}

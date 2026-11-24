@@ -1,0 +1,461 @@
+---
+import { Image } from "astro:assets";
+import pabloAtendiendo from "../assets/images/pablo-atendiendo.png";
+
+const filas = [
+  {
+    etiqueta: "Formación",
+    destacado: "Licenciado en Kinesiología y Fisiatría",
+    resto: " por la Universidad de Buenos Aires (UBA).",
+  },
+  {
+    etiqueta: "Mi enfoque",
+    destacado: "Atención humana y basada en evidencia.",
+    resto: " Diseño cada plan a medida de tu cuerpo y tus objetivos.",
+  },
+];
+---
+
+<section id="sobre-mi" class="sobre-mi" data-sobre-mi>
+  <div class="sobre-mi__texto">
+    <div class="sobre-mi__interior">
+      <h2
+        class="sobre-mi__titulo"
+        aria-label="Mi trabajo: que vuelvas a moverte"
+        data-sobre-mi-titulo
+      >
+        Mi trabajo: que<br class="solo-escritorio" /> vuelvas a moverte
+      </h2>
+
+      <div class="sobre-mi__linea-h" aria-hidden="true" data-sobre-mi-linea></div>
+
+      <dl class="sobre-mi__filas" data-sobre-mi-filas>
+        {
+          filas.map(({ etiqueta, destacado, resto }) => (
+            <div class="sobre-mi__fila">
+              <dt class="sobre-mi__etiqueta">{etiqueta}</dt>
+              <dd class="sobre-mi__descripcion">
+                <strong class="sobre-mi__destacado">{destacado}</strong>
+                {resto}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </div>
+
+  <div class="sobre-mi__media" data-sobre-mi-media>
+    <Image
+      src={pabloAtendiendo}
+      alt="Lic. Pablo Gago atendiendo a una paciente en el consultorio, realizando terapia manual sobre el hombro"
+      widths={[480, 720, 1080, 1440]}
+      sizes="(max-width: 1023px) 100vw, 41vw"
+      loading="lazy"
+      decoding="async"
+      class="sobre-mi__foto"
+      data-sobre-mi-foto
+    />
+  </div>
+
+  <!-- Sin JavaScript: todo visible en su estado final -->
+  <noscript>
+    <style is:inline>
+      .sobre-mi__titulo {
+        visibility: visible !important;
+      }
+      .sobre-mi__linea-h {
+        transform: none !important;
+      }
+      .sobre-mi__fila {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .sobre-mi__foto {
+        transform: none !important;
+      }
+    </style>
+  </noscript>
+</section>
+
+<script>
+  import {
+    clamp01,
+    leerColor,
+    partirEnLetras,
+    pintarLetras,
+    type PaletaRevelado,
+    type RGB,
+  } from "../scripts/revelar-letras";
+
+  const reducirMovimiento = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+
+  const seccion = document.querySelector<HTMLElement>("[data-sobre-mi]");
+  const titulo = document.querySelector<HTMLElement>("[data-sobre-mi-titulo]");
+  const linea = document.querySelector<HTMLElement>("[data-sobre-mi-linea]");
+  const filas = document.querySelector<HTMLElement>("[data-sobre-mi-filas]");
+  const media = document.querySelector<HTMLElement>("[data-sobre-mi-media]");
+  const foto = document.querySelector<HTMLElement>("[data-sobre-mi-foto]");
+
+  // Compone un token translúcido (--texto-claro-secundario) sobre el fondo oscuro
+  // para obtener el RGB equivalente que usa pintarLetras en la fase fantasma.
+  function leerColorSobreFondo(token: string, fondo: RGB): RGB {
+    const valor = getComputedStyle(document.documentElement)
+      .getPropertyValue(token)
+      .trim();
+    const ctx = document.createElement("canvas").getContext("2d");
+    if (!ctx || !valor) return leerColor(token);
+    ctx.fillStyle = "#000";
+    ctx.fillStyle = valor;
+    const normalizado = String(ctx.fillStyle);
+    if (normalizado.startsWith("#")) return leerColor(token);
+    const canales = normalizado.match(/[\d.]+/g);
+    if (!canales || canales.length < 4) return leerColor(token);
+    const alfa = Number(canales[3]);
+    return [
+      Math.round(fondo[0] * (1 - alfa) + Number(canales[0]) * alfa),
+      Math.round(fondo[1] * (1 - alfa) + Number(canales[1]) * alfa),
+      Math.round(fondo[2] * (1 - alfa) + Number(canales[2]) * alfa),
+    ];
+  }
+
+  if (seccion && titulo && linea && filas && media && foto) {
+    if (reducirMovimiento) {
+      titulo.classList.add("is-listo");
+      filas.classList.add("is-visible");
+    } else {
+      const AZUL_NOCHE = leerColor("--azul-noche");
+      const FANTASMA = leerColorSobreFondo(
+        "--texto-claro-secundario",
+        AZUL_NOCHE,
+      );
+      const CELESTE = leerColor("--celeste");
+      const BLANCO = leerColor("--blanco");
+
+      const paleta: PaletaRevelado = {
+        fantasma: FANTASMA,
+        acento: CELESTE,
+        final: BLANCO,
+        resaltado: BLANCO,
+      };
+
+      const SPREAD_TITULO = 0.35;
+      const UMBRAL_FILAS = 0.92;
+      const letras = partirEnLetras(titulo, "sobre-mi__resaltado");
+
+      let ultimoP2 = -1;
+      let ultimaEscala = -1;
+      let filasVisibles = false;
+
+      const actualizar = () => {
+        const alto = window.innerHeight || 1;
+        const topSeccion = seccion.getBoundingClientRect().top;
+        const p2 = clamp01((0.8 - topSeccion / alto) / 0.65);
+
+        if (p2 !== ultimoP2) {
+          pintarLetras(letras, p2, SPREAD_TITULO, paleta);
+          linea.style.transform = `scaleX(${p2.toFixed(4)})`;
+          ultimoP2 = p2;
+        }
+
+        const mostrarFilas = p2 > UMBRAL_FILAS;
+        if (mostrarFilas !== filasVisibles) {
+          filas.classList.toggle("is-visible", mostrarFilas);
+          filasVisibles = mostrarFilas;
+        }
+
+        // En escritorio media.top coincide con seccion.top; en celular arranca cuando la foto entra en pantalla
+        const topMedia = media.getBoundingClientRect().top;
+        const escala = Number(
+          (1.08 - 0.08 * clamp01(1 - topMedia / alto)).toFixed(4),
+        );
+        if (escala !== ultimaEscala) {
+          foto.style.transform = escala === 1 ? "" : `scale(${escala})`;
+          ultimaEscala = escala;
+        }
+      };
+
+      actualizar();
+      titulo.classList.add("is-listo");
+
+      window.addEventListener("scroll", actualizar, { passive: true });
+      window.addEventListener("resize", actualizar, { passive: true });
+    }
+  }
+</script>
+
+<style>
+  .sobre-mi {
+    --linea-panel: rgb(255 255 255 / 0.16);
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 59% 41%;
+    background-color: var(--azul-noche);
+    color: var(--blanco);
+  }
+
+  .sobre-mi__texto {
+    /* Alinea la guía con --margen-x hasta 1440 px y con el contenedor de 1296 px en pantallas más anchas */
+    --guia-x: max(var(--margen-x), calc(84.7458% - 648px));
+    position: relative;
+  }
+
+  /* Línea vertical de 1 px de alto completo sobre la columna oscura */
+  .sobre-mi__texto::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--guia-x);
+    width: 1px;
+    background-color: var(--linea-panel);
+    pointer-events: none;
+  }
+
+  .sobre-mi__interior {
+    --pad-izq: clamp(2rem, 6.406vw, 5.125rem);
+    --pad-der: clamp(1.5rem, 5.625vw, 4.5rem);
+    margin-left: var(--guia-x);
+  }
+
+  .sobre-mi__titulo {
+    padding: clamp(112px, 19.23vh, 180px) var(--pad-der)
+      clamp(32px, 5.65vh, 52px) var(--pad-izq);
+    /* 34 px en 820 px → 44 px en 1280 px+ */
+    font-size: clamp(2.125rem, 1.011rem + 2.174vw, 2.75rem);
+    font-weight: var(--peso-medium);
+    line-height: 1.1;
+    letter-spacing: var(--tracking-titular);
+    color: var(--blanco);
+  }
+
+  /* Oculto hasta que el script lo parte en letras (evita un parpadeo) */
+  .sobre-mi__titulo[data-sobre-mi-titulo]:not(.is-listo) {
+    visibility: hidden;
+  }
+
+  .sobre-mi__titulo :global(.palabra) {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .sobre-mi__titulo :global(.letra) {
+    display: inline-block;
+  }
+
+  .sobre-mi__linea-h {
+    width: 100%;
+    height: 1px;
+    background-color: var(--linea-panel);
+    transform: scaleX(0);
+    transform-origin: left center;
+    will-change: transform;
+  }
+
+  .sobre-mi__filas {
+    margin: 0;
+    padding: clamp(24px, 3.6vh, 36px) var(--pad-der) clamp(48px, 8vh, 80px)
+      var(--pad-izq);
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .sobre-mi__fila {
+    display: grid;
+    grid-template-columns: minmax(104px, 0.93fr) minmax(210px, 1fr);
+    column-gap: clamp(16px, 1.875vw, 24px);
+    align-items: start;
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+      opacity 0.9s var(--curva-animacion),
+      transform 0.9s var(--curva-animacion);
+  }
+
+  .sobre-mi__filas.is-visible .sobre-mi__fila {
+    opacity: 1;
+    transform: none;
+  }
+
+  .sobre-mi__filas.is-visible .sobre-mi__fila:nth-child(2) {
+    transition-delay: 0.1s;
+  }
+
+  .sobre-mi__etiqueta {
+    margin: 0;
+    /* 15 px en 820 px → 17 px en 1280 px+ */
+    font-size: clamp(0.9375rem, 0.715rem + 0.435vw, 1.0625rem);
+    font-weight: var(--peso-regular);
+    line-height: 1.35;
+    color: var(--blanco);
+  }
+
+  .sobre-mi__descripcion {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: var(--peso-regular);
+    line-height: 1.5;
+    color: var(--texto-claro-secundario);
+    max-width: 17.5rem;
+  }
+
+  .sobre-mi__destacado {
+    font-weight: var(--peso-medium);
+    color: var(--blanco);
+  }
+
+  .sobre-mi__media {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sobre-mi__foto {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    object-position: 50% 22%;
+    transform-origin: 50% 60%;
+    will-change: transform;
+  }
+
+  /* Tablet (640–1023 px; base 834 px — ver tokens.css): texto arriba (506 px) y foto a todo el ancho abajo (640 px) */
+  @media (min-width: 640px) and (max-width: 1023px) {
+    .sobre-mi {
+      min-height: auto;
+      grid-template-columns: 1fr;
+    }
+
+    .sobre-mi__texto {
+      --guia-x: var(--margen-x);
+      min-height: 506px;
+    }
+
+    .sobre-mi__interior {
+      --pad-izq: var(--margen-x);
+      --pad-der: var(--margen-x);
+    }
+
+    .sobre-mi__titulo {
+      /* En 834 px: titular 44 px en x = 96, y = 104; línea horizontal en y = 240 */
+      padding: 104px var(--pad-der) 39px var(--pad-izq);
+      font-size: clamp(2.25rem, 0.6rem + 4.124vw, 2.75rem);
+    }
+
+    .sobre-mi__filas {
+      /* En 834 px: filas en y = 276 y y = 355 */
+      padding: 35px var(--pad-der) 64px var(--pad-izq);
+      gap: 34px;
+    }
+
+    .sobre-mi__fila {
+      /* En 834 px: etiqueta en x = 96, párrafo en x = 330 de 456 px de ancho */
+      grid-template-columns: minmax(120px, 210fr) minmax(0, 456fr);
+      column-gap: 24px;
+    }
+
+    .sobre-mi__etiqueta {
+      font-size: 1.0625rem;
+    }
+
+    .sobre-mi__descripcion {
+      font-size: 0.9375rem;
+      max-width: 32rem;
+    }
+
+    .sobre-mi__media {
+      /* 640 px exactos en 834 px (834 × 640) */
+      height: clamp(500px, 76.74vw, 680px);
+    }
+
+    .sobre-mi__foto {
+      object-position: 50% 14%;
+    }
+  }
+
+  /* Celular (< 640 px; base 393 px — ver --bp-celular-max en tokens.css) */
+  @media (max-width: 639px) {
+    .sobre-mi {
+      min-height: auto;
+      grid-template-columns: 1fr;
+    }
+
+    .sobre-mi__texto {
+      /* 16 px en 393 px → 44 px en 768 px */
+      --guia-x: clamp(1rem, -0.835rem + 7.47vw, 2.75rem);
+      min-height: 457px;
+    }
+
+    .sobre-mi__interior {
+      /* 24 px en 393 px → 36 px en 768 px */
+      --pad-izq: clamp(1.5rem, 0.72rem + 3.2vw, 2.25rem);
+      --pad-der: var(--margen-x);
+    }
+
+    .solo-escritorio {
+      display: none;
+    }
+
+    .sobre-mi__titulo {
+      padding: clamp(72px, 38px + 8.6vw, 108px) var(--pad-der) 31px
+        var(--pad-izq);
+      font-size: 2.125rem;
+    }
+
+    .sobre-mi__filas {
+      padding: 27px var(--pad-der) 54px var(--pad-izq);
+      gap: 27px;
+    }
+
+    .sobre-mi__fila {
+      grid-template-columns: 1fr;
+      row-gap: 8px;
+    }
+
+    .sobre-mi__etiqueta {
+      font-size: 0.9375rem;
+    }
+
+    .sobre-mi__descripcion {
+      font-size: 0.9375rem;
+      max-width: 34rem;
+    }
+
+    .sobre-mi__media {
+      height: clamp(480px, 249px + 58.7vw, 720px);
+    }
+
+    .sobre-mi__foto {
+      object-position: 50% 28%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sobre-mi__titulo[data-sobre-mi-titulo]:not(.is-listo) {
+      visibility: visible;
+    }
+
+    .sobre-mi__linea-h {
+      transform: none;
+      will-change: auto;
+    }
+
+    .sobre-mi__fila {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+
+    .sobre-mi__foto {
+      transform: none;
+      will-change: auto;
+    }
+  }
+</style>

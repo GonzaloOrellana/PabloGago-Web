@@ -1,0 +1,413 @@
+---
+// TODO: validar los textos y descripciones de los servicios con Pablo.
+const columnaIzquierda = [
+  {
+    id: "rehabilitacion-fisica",
+    nombre: "Rehabilitación física",
+    descripcion:
+      "Te ayudo a recuperar el movimiento y la función de tu cuerpo después de una lesión, una cirugía o un tiempo de inactividad, con ejercicios guiados y progresivos.",
+  },
+  {
+    id: "fisioterapia",
+    nombre: "Fisioterapia",
+    descripcion:
+      "Uso agentes físicos como ultrasonido, magnetoterapia y electroanalgesia para aliviar el dolor y acelerar la recuperación de los tejidos.",
+  },
+  {
+    id: "kinesioterapia",
+    nombre: "Kinesioterapia",
+    descripcion:
+      "Trabajo con ejercicios terapéuticos para que recuperes movilidad, fuerza y control en tu día a día.",
+  },
+  {
+    id: "rehabilitacion-deportiva",
+    nombre: "Rehabilitación deportiva",
+    descripcion:
+      "Te acompaño desde la lesión hasta la vuelta al entrenamiento, con una readaptación específica para tu deporte.",
+  },
+];
+
+// El Método 3 Escuadras va siempre último.
+const columnaDerecha = [
+  {
+    id: "acupuntura",
+    nombre: "Acupuntura",
+    descripcion:
+      "Desde la medicina tradicional china, estimulo puntos específicos del cuerpo para aliviar el dolor de forma natural.",
+  },
+  {
+    id: "taping-neuromuscular",
+    nombre: "Taping neuromuscular",
+    descripcion:
+      "Aplico un vendaje terapéutico que da soporte y estabilidad a músculos y articulaciones sin limitar tu movimiento.",
+  },
+  {
+    id: "metodo-3-escuadras",
+    nombre: "Método 3 Escuadras",
+    descripcion:
+      "Un método de reeducación postural con el que trabajo desequilibrios del cuerpo para aliviar dolores de espalda, cuello y articulaciones.",
+  },
+];
+
+const columnas = [
+  { offset: 0, servicios: columnaIzquierda },
+  { offset: columnaIzquierda.length, servicios: columnaDerecha },
+];
+---
+
+<section
+  id="servicios"
+  class="servicios"
+  aria-labelledby="servicios-titulo"
+  data-servicios
+>
+  <div class="servicios__interior">
+    <h2 id="servicios-titulo" class="servicios__titulo fade-up">
+      ¿En qué te<br class="solo-celular" /> puedo ayudar?
+    </h2>
+
+    <div class="servicios__acordeon" data-acordeon>
+      {
+        columnas.map(({ offset, servicios }) => (
+          <div class="servicios__columna">
+            {servicios.map(({ id, nombre, descripcion }, i) => {
+              const botonId = `servicio-boton-${id}`;
+              const panelId = `servicio-panel-${id}`;
+              const retraso = (0.15 + (offset + i) * 0.07).toFixed(2);
+              return (
+                <div
+                  class="servicios__item fade-up"
+                  style={`--d: ${retraso}s`}
+                  data-acordeon-item
+                  data-abierto="false"
+                >
+                  <h3 class="servicios__cabecera">
+                    <button
+                      type="button"
+                      id={botonId}
+                      class="servicios__boton"
+                      aria-expanded="false"
+                      aria-controls={panelId}
+                      data-acordeon-boton
+                    >
+                      <span class="servicios__nombre">{nombre}</span>
+                      <svg
+                        class="servicios__chevron"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        height="24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </button>
+                  </h3>
+
+                  <div
+                    id={panelId}
+                    role="region"
+                    aria-labelledby={botonId}
+                    aria-hidden="true"
+                    class="servicios__panel"
+                    data-acordeon-panel
+                  >
+                    <div class="servicios__panel-interior">
+                      <p class="servicios__descripcion">{descripcion}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ))
+      }
+    </div>
+  </div>
+
+  <!-- Sin JavaScript: todo visible y descripciones legibles -->
+  <noscript>
+    <style is:inline>
+      .servicios .fade-up {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .servicios__panel {
+        grid-template-rows: 1fr !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+    </style>
+  </noscript>
+</section>
+
+<script>
+  const seccion = document.querySelector<HTMLElement>("[data-servicios]");
+  const reducirMovimiento = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+
+  if (seccion) {
+    if (reducirMovimiento || !("IntersectionObserver" in window)) {
+      seccion.classList.add("is-visible");
+    } else {
+      const observador = new IntersectionObserver(
+        (entradas) => {
+          if (entradas.some((e) => e.isIntersecting)) {
+            seccion.classList.add("is-visible");
+            observador.disconnect();
+          }
+        },
+        { threshold: 0.25 },
+      );
+      observador.observe(seccion);
+    }
+  }
+
+  const acordeon = document.querySelector<HTMLElement>("[data-acordeon]");
+
+  if (acordeon) {
+    const items = Array.from(
+      acordeon.querySelectorAll<HTMLElement>("[data-acordeon-item]"),
+    );
+
+    const definirEstado = (item: HTMLElement, abierto: boolean) => {
+      const boton = item.querySelector<HTMLButtonElement>(
+        "[data-acordeon-boton]",
+      );
+      const panel = item.querySelector<HTMLElement>("[data-acordeon-panel]");
+
+      item.dataset.abierto = abierto ? "true" : "false";
+      boton?.setAttribute("aria-expanded", abierto ? "true" : "false");
+      panel?.setAttribute("aria-hidden", abierto ? "false" : "true");
+    };
+
+    items.forEach((item) => {
+      const boton = item.querySelector<HTMLButtonElement>(
+        "[data-acordeon-boton]",
+      );
+      if (!boton) return;
+
+      boton.addEventListener("click", () => {
+        const estabaAbierto = item.dataset.abierto === "true";
+
+        items.forEach((otro) => {
+          if (otro !== item && otro.dataset.abierto === "true") {
+            definirEstado(otro, false);
+          }
+        });
+
+        definirEstado(item, !estabaAbierto);
+      });
+    });
+  }
+</script>
+
+<style>
+  .servicios {
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    padding: clamp(124px, 18.87vh, 176px) var(--margen-x)
+      clamp(96px, 12vh, 140px);
+    background-color: var(--blanco);
+    color: var(--azul-noche);
+  }
+
+  .servicios__interior {
+    width: 100%;
+    max-width: 1296px;
+    margin-inline: auto;
+  }
+
+  .servicios__titulo {
+    text-align: center;
+    /* 36 px en 393 px → 56 px en 1280 px+ */
+    font-size: clamp(2.25rem, 1.696rem + 2.255vw, 3.5rem);
+    font-weight: var(--peso-medium);
+    line-height: var(--interlineado-titular);
+    letter-spacing: var(--tracking-titular);
+    color: var(--azul-noche);
+  }
+
+  .solo-celular {
+    display: none;
+  }
+
+  .servicios__acordeon {
+    margin-top: 72px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: clamp(32px, 3.75vw, 48px);
+    align-items: start;
+  }
+
+  .servicios__columna {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /*
+   * Geometría sin saltos de padding durante la transición 0fr ↔ 1fr:
+   * Escritorio: 10 + 12 = 22 px arriba; cerrado 12 + 10 = 22 px abajo;
+   *             abierto 12 px entre nombre y descripción, 18 + 10 = 28 px abajo.
+   * Celular:    6 + 12 = 18 px arriba; cerrado 12 + 6 = 18 px abajo;
+   *             abierto 12 px entre nombre y descripción, 18 + 6 = 24 px abajo.
+   */
+  .servicios__item {
+    padding: 10px 0;
+  }
+
+  .servicios__cabecera {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  .servicios__boton {
+    width: 100%;
+    padding: 12px 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .servicios__boton:focus-visible {
+    outline: 2px solid var(--azul-noche);
+    outline-offset: 4px;
+  }
+
+  .servicios__nombre {
+    /* 20 px en 820 px → 24 px en 1280 px+ */
+    font-size: clamp(1.25rem, 0.804rem + 0.87vw, 1.5rem);
+    font-weight: var(--peso-medium);
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    color: var(--azul-noche);
+    transition: opacity 0.2s ease;
+  }
+
+  @media (hover: hover) {
+    .servicios__boton:hover .servicios__nombre {
+      opacity: 0.72;
+    }
+  }
+
+  .servicios__chevron {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    color: var(--azul-noche);
+    transition: transform 0.45s var(--curva-animacion);
+  }
+
+  .servicios__item[data-abierto="true"] .servicios__chevron {
+    transform: rotate(180deg);
+  }
+
+  .servicios__panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      grid-template-rows 0.45s var(--curva-animacion),
+      opacity 0.3s ease,
+      visibility 0s linear 0.45s;
+  }
+
+  .servicios__item[data-abierto="true"] .servicios__panel {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    visibility: visible;
+    transition:
+      grid-template-rows 0.45s var(--curva-animacion),
+      opacity 0.35s ease 0.05s,
+      visibility 0s linear 0s;
+  }
+
+  .servicios__panel-interior {
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .servicios__descripcion {
+    padding-right: 64px;
+    padding-bottom: 18px;
+    font-size: 1rem;
+    font-weight: var(--peso-regular);
+    line-height: var(--interlineado-cuerpo);
+    color: var(--texto-secundario);
+  }
+
+  /* Tablet (640–1023 px; base 834 px — ver tokens.css): 1 columna con tamaños y paddings de escritorio */
+  @media (min-width: 640px) and (max-width: 1023px) {
+    .servicios {
+      min-height: auto;
+      padding: clamp(96px, 43.1px + 8.26vw, 112px) var(--margen-x);
+    }
+
+    .servicios__titulo {
+      /* 40 px en 640 px → 48 px exactos en 834 px → 52 px en 1023 px */
+      font-size: clamp(2.5rem, 0.85rem + 4.124vw, 3.25rem);
+    }
+
+    .servicios__acordeon {
+      margin-top: 56px;
+      grid-template-columns: 1fr;
+    }
+
+    .servicios__nombre {
+      font-size: 1.5rem;
+    }
+  }
+
+  /* Celular (< 640 px; base 393 px — ver --bp-celular-max en tokens.css) */
+  @media (max-width: 639px) {
+    .servicios {
+      min-height: auto;
+      padding: clamp(88px, 62.8px + 6.4vw, 112px) var(--margen-x);
+    }
+
+    .solo-celular {
+      display: block;
+    }
+
+    .servicios__acordeon {
+      margin-top: clamp(36px, 23.4px + 3.2vw, 48px);
+      grid-template-columns: 1fr;
+    }
+
+    .servicios__item {
+      padding: 6px 0;
+    }
+
+    .servicios__nombre {
+      font-size: 1.25rem;
+    }
+
+    .servicios__descripcion {
+      padding-right: 0;
+      font-size: 0.9375rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .servicios__nombre,
+    .servicios__chevron,
+    .servicios__panel,
+    .servicios__item[data-abierto="true"] .servicios__panel {
+      transition: none;
+    }
+  }
+</style>

@@ -1,0 +1,579 @@
+---
+import { Image } from "astro:assets";
+import isotipo from "../assets/images/isotipo.png";
+import Boton from "./ui/Boton.astro";
+
+const WHATSAPP_URL =
+  "https://wa.me/5491156426761?text=Hola%20Pablo%2C%20quisiera%20reservar%20un%20turno.";
+
+const MAPA_ENLACE_URL =
+  "https://www.google.com/maps/place/C.+Irigoyen+642,+C1407CAP+CABA/@-34.6338228,-58.5095708,17z";
+
+const anio = new Date().getFullYear();
+
+const navegacion = [
+  { texto: "Inicio", href: "#inicio" },
+  { texto: "Sobre mí", href: "#sobre-mi" },
+  { texto: "Servicios", href: "#servicios" },
+  { texto: "Testimonios", href: "#testimonios" },
+  { texto: "Consultorio", href: "#consultorio" },
+  { texto: "Ubicación", href: "#ubicacion" },
+];
+
+const horarios = ["Lunes a viernes", "16:00 a 20:00", "Con turno previo"];
+---
+
+<footer id="contacto" class="footer" data-footer>
+  <Image
+    src={isotipo}
+    alt=""
+    aria-hidden="true"
+    width={520}
+    height={520}
+    widths={[380, 440, 520, 880, 1040]}
+    sizes="(max-width: 639px) 439px, (max-width: 1023px) 380px, 520px"
+    format="webp"
+    loading="lazy"
+    decoding="async"
+    class="footer__decorativo"
+  />
+
+  <div class="footer__interior">
+    <div class="footer__superior">
+      <div class="footer__marca fade-up" style="--d: 0s">
+        <div class="footer__identidad">
+          <Image
+            src={isotipo}
+            alt=""
+            width={30}
+            height={30}
+            widths={[30, 60]}
+            sizes="30px"
+            format="webp"
+            loading="lazy"
+            decoding="async"
+            class="footer__isotipo"
+          />
+          <span class="footer__nombre">Pablo Gago</span>
+        </div>
+
+        <p class="footer__descripcion">
+          Kinesiología y fisiatría a tu medida, de la lesión al alta.
+          Consultorio en CABA.
+        </p>
+
+        <div class="footer__cta">
+          <Boton
+            texto="Reservar turno"
+            href={WHATSAPP_URL}
+            variante="invertido"
+            tamaño="normal"
+          />
+        </div>
+      </div>
+
+      <div class="footer__columnas">
+        <nav
+          class="footer__columna footer__columna--nav fade-up"
+          style="--d: 0.08s"
+          aria-label="Pie de página"
+        >
+          <h2 class="footer__col-titulo">Navegación</h2>
+          <ul class="footer__lista">
+            {
+              navegacion.map(({ texto, href }) => (
+                <li class="footer__item">
+                  <a href={href} class="footer__enlace">
+                    {texto}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+
+        <div
+          class="footer__columna footer__columna--contacto fade-up"
+          style="--d: 0.16s"
+        >
+          <h2 class="footer__col-titulo">Contacto</h2>
+          <ul class="footer__lista">
+            <li class="footer__item">
+              <a href="tel:+5491156426761" class="footer__enlace">
+                +54 9 11 5642-6761
+              </a>
+            </li>
+            <li class="footer__item">
+              <a
+                href="mailto:licpablogago@hotmail.com"
+                class="footer__enlace"
+              >
+                licpablogago@hotmail.com
+              </a>
+            </li>
+            <li class="footer__item">
+              <a
+                href={MAPA_ENLACE_URL}
+                class="footer__enlace"
+                target="_blank"
+                rel="noopener"
+              >
+                C. Irigoyen 642, CABA
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div
+          class="footer__columna footer__columna--horarios fade-up"
+          style="--d: 0.24s"
+        >
+          <h2 class="footer__col-titulo">Horarios</h2>
+          <ul class="footer__lista">
+            {horarios.map((linea) => <li class="footer__item">{linea}</li>)}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__inferior fade-up" style="--d: 0.32s">
+      <div class="footer__linea" aria-hidden="true"></div>
+
+      <div class="footer__pie">
+        <p class="footer__copyright">
+          © {anio} Lic. Pablo Gago.<span class="footer__copyright-extra">{" "}Todos los derechos reservados.</span>
+        </p>
+
+        <div class="footer__iconos">
+          <a
+            href={WHATSAPP_URL}
+            class="footer__icono-enlace"
+            target="_blank"
+            rel="noopener"
+            aria-label="WhatsApp"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="currentColor"
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              aria-hidden="true"
+            >
+              <path
+                d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zM12.05 3.67c4.54 0 8.24 3.7 8.24 8.24 0 4.54-3.7 8.23-8.24 8.23-1.48 0-2.93-.39-4.2-1.14l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24zM17.85 15.97c-.25.7-1.44 1.34-2 1.42-.51.08-1.16.11-1.87-.12-.43-.14-.99-.32-1.7-.63-2.99-1.29-4.94-4.3-5.09-4.5-.15-.2-1.22-1.62-1.22-3.09s.77-2.19 1.05-2.49c.27-.3.6-.37.8-.37.2 0 .4 0 .57.01.18.01.43-.07.67.51.25.6.84 2.06.92 2.21.07.15.12.32.02.52-.1.2-.15.32-.3.5-.15.17-.31.39-.45.52-.15.15-.3.31-.13.61.17.3.77 1.27 1.66 2.06 1.14 1.02 2.1 1.33 2.4 1.48.3.15.47.12.65-.07.17-.2.75-.87.95-1.17.2-.3.4-.25.67-.15.27.1 1.74.82 2.04.97.3.15.5.22.57.35.08.12.08.72-.17 1.42z"
+              ></path>
+            </svg>
+          </a>
+
+          <a
+            href="mailto:licpablogago@hotmail.com"
+            class="footer__icono-enlace"
+            aria-label="Enviar un email"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="2.5" y="4.5" width="19" height="15" rx="2"></rect>
+              <path d="M3.5 6l8.5 6.5L20.5 6"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sin JavaScript: todo visible en su estado final -->
+  <noscript>
+    <style is:inline>
+      .footer .fade-up {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    </style>
+  </noscript>
+</footer>
+
+<script>
+  const footer = document.querySelector<HTMLElement>("[data-footer]");
+  const reducirMovimiento = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+
+  if (footer) {
+    if (reducirMovimiento || !("IntersectionObserver" in window)) {
+      footer.classList.add("is-visible");
+    } else {
+      const umbral = Math.min(
+        0.2,
+        (window.innerHeight * 0.5) / Math.max(footer.offsetHeight, 1),
+      );
+      const observador = new IntersectionObserver(
+        (entradas) => {
+          if (entradas.some((e) => e.isIntersecting)) {
+            footer.classList.add("is-visible");
+            observador.disconnect();
+          }
+        },
+        { threshold: umbral },
+      );
+      observador.observe(footer);
+    }
+  }
+</script>
+
+<style>
+  .footer {
+    position: relative;
+    z-index: 2;
+    overflow: hidden;
+    background-color: var(--azul-noche);
+    color: var(--blanco);
+  }
+
+  /* Logo decorativo detrás del contenido: 520 × 520 en x = 880, y = -40 a 1280 px */
+  .footer__decorativo {
+    position: absolute;
+    top: -40px;
+    right: -120px;
+    z-index: 0;
+    width: 520px;
+    height: 520px;
+    max-width: none;
+    object-fit: contain;
+    opacity: 0.07;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .footer__interior {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1440px;
+    margin-inline: auto;
+    padding: 68px 56px 72px;
+  }
+
+  .footer__superior {
+    display: grid;
+    grid-template-columns: 290px minmax(0, 1fr);
+    column-gap: 154px;
+    align-items: start;
+  }
+
+  .footer__marca {
+    width: 100%;
+    max-width: 290px;
+  }
+
+  .footer__identidad {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .footer__isotipo {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  .footer__nombre {
+    font-size: 1.25rem;
+    font-weight: var(--peso-medium);
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    color: var(--blanco);
+  }
+
+  .footer__descripcion {
+    margin-top: 16px;
+    font-size: 0.9375rem;
+    font-weight: var(--peso-regular);
+    line-height: var(--interlineado-cuerpo);
+    color: var(--texto-claro-secundario);
+  }
+
+  .footer__cta {
+    margin-top: 29px;
+  }
+
+  /* Tamaño 177 × 46 para el botón invertido del footer en todos los anchos */
+  .footer__cta :global(.boton.boton--normal) {
+    height: 46px;
+    padding: 5px 5px 5px 20px;
+    gap: 14px;
+    font-size: 0.9375rem;
+  }
+
+  .footer__cta :global(.boton.boton--normal .boton__circulo) {
+    width: 36px;
+    height: 36px;
+  }
+
+  .footer__cta :global(.boton.boton--normal .boton__icono) {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Columnas: x = 500, 660 y 900 a 1280 px */
+  .footer__columnas {
+    display: grid;
+    grid-template-columns: 160px 240px minmax(140px, 1fr);
+    padding-top: 4px;
+    align-items: start;
+  }
+
+  .footer__col-titulo {
+    font-size: 0.9375rem;
+    font-weight: var(--peso-semibold);
+    line-height: 1.4;
+    color: var(--blanco);
+  }
+
+  .footer__lista {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .footer__item {
+    font-size: 0.9375rem;
+    font-weight: var(--peso-regular);
+    line-height: 1.4;
+    color: var(--texto-claro-secundario);
+  }
+
+  .footer__enlace {
+    display: inline-block;
+    color: inherit;
+    transition: color 0.2s ease;
+  }
+
+  .footer__enlace:focus-visible,
+  .footer__icono-enlace:focus-visible {
+    outline: 2px solid var(--blanco);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  @media (hover: hover) {
+    .footer__enlace:hover,
+    .footer__icono-enlace:hover {
+      color: var(--blanco);
+    }
+  }
+
+  .footer__inferior {
+    margin-top: 45px;
+  }
+
+  .footer__linea {
+    width: 100%;
+    height: 1px;
+    background-color: color-mix(in srgb, var(--blanco) 14%, transparent);
+  }
+
+  .footer__pie {
+    margin-top: 27px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .footer__copyright {
+    font-size: 0.875rem;
+    font-weight: var(--peso-regular);
+    line-height: 1.4;
+    color: var(--texto-claro-secundario);
+  }
+
+  .footer__iconos {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .footer__icono-enlace {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    margin: -6px;
+    color: var(--texto-claro-secundario);
+    transition: color 0.2s ease;
+  }
+
+  /* ── Escritorio intermedio (980–1259 px): redistribución fluida en 1 fila ── */
+
+  @media (max-width: 1259px) {
+    .footer__decorativo {
+      width: 440px;
+      height: 440px;
+      top: -24px;
+      right: -140px;
+    }
+
+    .footer__interior {
+      padding: 64px clamp(32px, 4.4vw, 56px) 56px;
+    }
+
+    .footer__superior {
+      grid-template-columns: minmax(240px, 270px) minmax(0, 1fr);
+      column-gap: clamp(32px, 4vw, 72px);
+    }
+
+    .footer__columnas {
+      grid-template-columns:
+        minmax(108px, 1fr)
+        minmax(204px, 1.55fr)
+        minmax(124px, 1fr);
+      column-gap: clamp(20px, 2.5vw, 36px);
+    }
+  }
+
+  /* ── Tablet (640–1023 px; base 834 × 657 — ver tokens.css) ──────────── */
+
+  @media (min-width: 640px) and (max-width: 1023px) {
+    /* 380 × 380 en x = 534, y = -60 a 834 px (sobresale 80 px a la derecha) */
+    .footer__decorativo {
+      width: 380px;
+      height: 380px;
+      top: -60px;
+      right: -80px;
+      bottom: auto;
+    }
+
+    .footer__interior {
+      padding: 64px var(--margen-x) 45px;
+    }
+
+    .footer__superior {
+      grid-template-columns: 1fr;
+      row-gap: 64px;
+    }
+
+    .footer__marca {
+      max-width: 345px;
+    }
+
+    .footer__cta {
+      margin-top: 29px;
+    }
+
+    .footer__columnas {
+      /* En 834 px: Navegación x = 48, Contacto x = 288, Horarios x = 548 */
+      padding-top: 0;
+      grid-template-columns:
+        minmax(112px, 216fr)
+        minmax(196px, 236fr)
+        minmax(130px, 238fr);
+      column-gap: clamp(16px, 2.88vw, 24px);
+    }
+
+    .footer__inferior {
+      /* Columnas (y = 294..517) + 47 = línea en y = 564; pie en y = 592 */
+      margin-top: 47px;
+    }
+  }
+
+  /* ── Celular (< 640 px; base 393 × 609 — ver --bp-celular-max en tokens.css) ─ */
+
+  @media (max-width: 639px) {
+    /* 439 × 439 en x = 113, y = 301 a 393 × 609 (sobresale derecha y abajo) */
+    .footer__decorativo {
+      width: 439px;
+      height: 439px;
+      top: auto;
+      right: -159px;
+      bottom: -131px;
+    }
+
+    .footer__interior {
+      padding: 48px 24px 36px;
+    }
+
+    .footer__superior {
+      grid-template-columns: 1fr;
+      row-gap: 32px;
+    }
+
+    .footer__marca {
+      max-width: 345px;
+    }
+
+    .footer__cta {
+      margin-top: 24px;
+    }
+
+    .footer__columnas {
+      padding-top: 0;
+      grid-template-columns: minmax(132px, 132fr) minmax(0, 189fr);
+      grid-template-rows: auto auto;
+      column-gap: 24px;
+      row-gap: 28px;
+    }
+
+    .footer__columna--nav {
+      grid-column: 1;
+      grid-row: 1 / 3;
+    }
+
+    .footer__columna--horarios {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .footer__columna--contacto {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    .footer__lista {
+      margin-top: 14px;
+      gap: 10px;
+    }
+
+    .footer__item {
+      font-size: 0.875rem;
+      line-height: 1.4;
+    }
+
+    .footer__inferior {
+      margin-top: 32px;
+    }
+
+    .footer__pie {
+      margin-top: 24px;
+    }
+
+    .footer__copyright {
+      font-size: 0.8125rem;
+    }
+
+    .footer__copyright-extra {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .footer__enlace,
+    .footer__icono-enlace {
+      transition: none;
+    }
+  }
+</style>

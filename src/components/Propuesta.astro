@@ -1,0 +1,216 @@
+---
+---
+
+<section id="propuesta" class="propuesta" data-glow-zona>
+  <div class="propuesta__fija">
+    <h2
+      class="propuesta__frase"
+      aria-label="Evalúo tu caso, diseño tu plan, te trato en cada sesión, ajusto según tu evolución y te acompaño hasta que vuelvas a moverte sin dolor"
+      data-propuesta-frase
+    >
+      Evalúo tu caso, diseño tu plan,
+      <br class="solo-escritorio" /> te trato en cada sesión, ajusto según
+      <br class="solo-escritorio" /> tu evolución y te acompaño{" "}
+      <span class="propuesta__resaltado">
+        hasta que
+        <br class="solo-escritorio" /> vuelvas a moverte sin dolor
+      </span>
+    </h2>
+  </div>
+
+  <!-- Sin JavaScript: frase visible en sus colores finales -->
+  <noscript>
+    <style is:inline>
+      .propuesta__frase {
+        visibility: visible !important;
+      }
+    </style>
+  </noscript>
+</section>
+
+<script>
+  import {
+    clamp01,
+    leerColor,
+    partirEnLetras,
+    pintarLetras,
+    progresoReveladoPropuesta,
+    type PaletaRevelado,
+  } from "../scripts/revelar-letras";
+
+  const reducirMovimiento = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+
+  const frase = document.querySelector<HTMLElement>("[data-propuesta-frase]");
+
+  if (frase) {
+    if (reducirMovimiento) {
+      frase.classList.add("is-listo");
+    } else {
+      const BLANCO = leerColor("--blanco");
+      const AZUL_MARCA = leerColor("--azul-marca");
+      const AZUL_NOCHE = leerColor("--azul-noche");
+      const paleta: PaletaRevelado = {
+        fantasma: BLANCO,
+        acento: AZUL_MARCA,
+        final: AZUL_NOCHE,
+        resaltado: BLANCO,
+      };
+
+      const SPREAD_FRASE = 0.16;
+      const letras = partirEnLetras(frase, "propuesta__resaltado");
+
+      let ultimoP = -1;
+      let ultimaSubida = -1;
+
+      const actualizar = () => {
+        const alto = window.innerHeight || 1;
+        const q = window.scrollY / alto;
+
+        // Subida suave al entrar: translateY(0.205 · (1 - s)² · innerHeight)
+        const s = clamp01((q - 0.69) / 0.74);
+        const subida = 0.205 * (1 - s) * (1 - s) * alto;
+        const subidaRedondeada = subida > 0.05 ? Number(subida.toFixed(2)) : 0;
+        if (subidaRedondeada !== ultimaSubida) {
+          frase.style.transform = subidaRedondeada
+            ? `translateY(${subidaRedondeada}px)`
+            : "";
+          ultimaSubida = subidaRedondeada;
+        }
+
+        // Revelado letra por letra con el scroll
+        const p = progresoReveladoPropuesta(q);
+        if (p !== ultimoP) {
+          pintarLetras(letras, p, SPREAD_FRASE, paleta);
+          ultimoP = p;
+        }
+      };
+
+      // Pintar estado inicial (p = 0 al cargar arriba) antes de mostrar el elemento
+      actualizar();
+      frase.classList.add("is-listo");
+
+      window.addEventListener("scroll", actualizar, { passive: true });
+      window.addEventListener("resize", actualizar, { passive: true });
+    }
+  }
+</script>
+
+<style>
+  .propuesta {
+    position: relative;
+    z-index: 1;
+    height: 306vh;
+    margin-top: -31vh;
+    pointer-events: none;
+    background: transparent;
+  }
+
+  .propuesta__fija {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Compensa visualmente la barra superior fija para calzar con la captura de 1280 × 832 */
+    padding-top: 40px;
+    padding-inline: var(--margen-x);
+  }
+
+  .propuesta__frase {
+    /* 31 px en 393 px → 52 px en 1280 px; por encima de 1440 px no crece más */
+    font-size: clamp(1.9375rem, 1.356rem + 2.368vw, 3.25rem);
+    font-weight: var(--peso-medium);
+    line-height: 1.18;
+    letter-spacing: -0.03em;
+    text-align: center;
+    color: var(--azul-noche);
+    will-change: transform;
+  }
+
+  /* Oculto hasta que el script lo parte en letras (evita un parpadeo) */
+  .propuesta__frase[data-propuesta-frase]:not(.is-listo) {
+    visibility: hidden;
+  }
+
+  /* Las palabras no se cortan entre líneas */
+  .propuesta__frase :global(.palabra) {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .propuesta__frase :global(.letra) {
+    display: inline-block;
+  }
+
+  .propuesta__resaltado {
+    color: var(--blanco);
+  }
+
+  /* En tablet y celular (≤ 1023 px; ver tokens.css) los <br> se ocultan y el texto fluye solo */
+  @media (max-width: 1023px) {
+    .solo-escritorio {
+      display: none;
+    }
+  }
+
+  /* Tablet (640–1023 px; base 834 px): 44 px, interlineado 1.18, ancho 690 px, centrado */
+  @media (min-width: 640px) and (max-width: 1023px) {
+    .propuesta__fija {
+      height: 100svh;
+      padding-top: 0;
+    }
+
+    .propuesta__frase {
+      /* 38 px en 640 px → 44 px exactos en 834 px → 48 px en 1023 px */
+      font-size: clamp(2.375rem, 1.138rem + 3.093vw, 3rem);
+      line-height: 1.18;
+      /* 690 px exactos a 44 px */
+      max-width: 15.682em;
+    }
+  }
+
+  /* Celular (< 640 px; base 393 px): 31 px, interlineado 1.22, ancho 345 px, centrado exacto */
+  @media (max-width: 639px) {
+    .propuesta__fija {
+      height: 100svh;
+      padding-top: 0;
+    }
+
+    .propuesta__frase {
+      line-height: 1.22;
+      max-width: 11.13em;
+    }
+  }
+
+  /* Movimiento reducido: sección fija de 100vh con fondo celeste y texto visible */
+  @media (prefers-reduced-motion: reduce) {
+    .propuesta {
+      height: 100vh;
+      margin-top: 0;
+      background-color: var(--celeste);
+      pointer-events: auto;
+    }
+
+    .propuesta__fija {
+      position: static;
+      height: 100%;
+    }
+
+    .propuesta__frase {
+      will-change: auto;
+    }
+
+    .propuesta__frase[data-propuesta-frase]:not(.is-listo) {
+      visibility: visible;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) and (max-width: 1023px) {
+    .propuesta {
+      height: 100svh;
+    }
+  }
+</style>

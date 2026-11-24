@@ -1,0 +1,874 @@
+---
+// TODO: confirmar con Pablo que estos testimonios sean reales.
+const testimonios = [
+  {
+    id: "maria-g",
+    iniciales: "MG",
+    nombre: "María G.",
+    detalle: "Rehabilitación de rodilla",
+    cita: "Recuperé mi rodilla gracias a Pablo; muy profesional y claro en el seguimiento. Volví a correr en menos tiempo del esperado.",
+  },
+  {
+    id: "juan-p",
+    iniciales: "JP",
+    nombre: "Juan P.",
+    detalle: "Paciente",
+    cita: "Excelente trato y resultados. El consultorio es impecable y la atención súper dedicada. Lo recomiendo al 100%.",
+  },
+  {
+    id: "sofia-l",
+    iniciales: "SL",
+    nombre: "Sofía L.",
+    detalle: "Método 3 Escuadras",
+    cita: "Llegué con un dolor lumbar crónico y con el método de las 3 escuadras mejoró muchísimo mi postura y calidad de vida.",
+  },
+];
+---
+
+<section
+  id="testimonios"
+  class="testimonios"
+  aria-labelledby="testimonios-titulo"
+  data-testimonios
+>
+  <h2 id="testimonios-titulo" class="solo-lectores">
+    Testimonios de pacientes
+  </h2>
+
+  <div class="testimonios__interior">
+    <svg
+      class="testimonios__comillas fade-up"
+      style="--d: 0s"
+      viewBox="0 0 34 26"
+      width="34"
+      height="26"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path
+        d="M7.2 0C3.22 0 0 3.22 0 7.2c0 3.85 3.02 6.99 6.82 7.19-.28 3.92-2.22 7.18-5.62 9.41l1.55 2.02C9.5 22.86 14.4 16.58 14.4 7.8 14.4 3.2 11.35 0 7.2 0Zm19.6 0c-3.98 0-7.2 3.22-7.2 7.2 0 3.85 3.02 6.99 6.82 7.19-.28 3.92-2.22 7.18-5.62 9.41l1.55 2.02c6.75-2.96 11.65-9.24 11.65-18.02 0-4.6-3.05-7.8-7.2-7.8Z"
+      />
+    </svg>
+
+    <!-- Vista escritorio: paneles superpuestos con subgrid (reserva el alto de la cita más larga) + pestañas ARIA -->
+    <div class="testimonios__escritorio">
+      <div class="testimonios__escenario">
+        {
+          testimonios.map(({ id, iniciales, nombre, detalle, cita }, i) => {
+            const activo = i === 0;
+            return (
+              <div
+                id={`testimonio-panel-${id}`}
+                role="tabpanel"
+                aria-labelledby={`testimonio-tab-${id}`}
+                aria-hidden={activo ? "false" : "true"}
+                inert={activo ? undefined : true}
+                class="testimonios__panel"
+                data-panel={i}
+                data-estado={activo ? "activo" : "inactivo"}
+              >
+                <blockquote
+                  class="testimonios__cita fade-up"
+                  style="--d: 0.12s"
+                >
+                  “{cita}”
+                </blockquote>
+
+                <div class="testimonios__autor fade-up" style="--d: 0.24s">
+                  <span class="testimonios__avatar" aria-hidden="true">
+                    {iniciales}
+                  </span>
+                  <div class="testimonios__autor-info">
+                    <span class="testimonios__autor-nombre">{nombre}</span>
+                    <span class="testimonios__autor-detalle">{detalle}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        }
+      </div>
+
+      <div
+        class="testimonios__tabs fade-up"
+        style="--d: 0.36s"
+        role="tablist"
+        aria-label="Seleccionar testimonio"
+        data-testimonios-tabs
+      >
+        {
+          testimonios.map(({ id, nombre, detalle }, i) => {
+            const activo = i === 0;
+            return (
+              <button
+                type="button"
+                role="tab"
+                id={`testimonio-tab-${id}`}
+                class="testimonios__tab"
+                aria-selected={activo ? "true" : "false"}
+                aria-controls={`testimonio-panel-${id}`}
+                tabindex={activo ? 0 : -1}
+                data-tab={i}
+              >
+                <svg
+                  class="testimonios__tab-borde"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <rect
+                    x="0"
+                    y="0"
+                    width="100%"
+                    height="100%"
+                    rx="59.5"
+                    ry="59.5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1"
+                    stroke-dasharray="4 4"
+                  />
+                </svg>
+                <span class="testimonios__tab-nombre">{nombre}</span>
+                <span class="testimonios__tab-detalle">{detalle}</span>
+              </button>
+            );
+          })
+        }
+      </div>
+    </div>
+
+    <!-- Vista celular: carrusel nativo con scroll-snap + indicador clickeable -->
+    <div class="testimonios__celular">
+      <div
+        class="testimonios__carrusel fade-up"
+        style="--d: 0.14s"
+        role="region"
+        aria-roledescription="carrusel"
+        aria-label="Testimonios de pacientes"
+        data-carrusel
+      >
+        {
+          testimonios.map(({ iniciales, nombre, detalle, cita }, i) => (
+            <article
+              class="testimonios__diapositiva"
+              aria-roledescription="diapositiva"
+              aria-label={`Testimonio ${i + 1} de ${testimonios.length}`}
+              data-diapositiva={i}
+            >
+              <blockquote class="testimonios__cita">“{cita}”</blockquote>
+
+              <div class="testimonios__autor">
+                <span class="testimonios__avatar" aria-hidden="true">
+                  {iniciales}
+                </span>
+                <div class="testimonios__autor-info">
+                  <span class="testimonios__autor-nombre">{nombre}</span>
+                  <span class="testimonios__autor-detalle">{detalle}</span>
+                </div>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+
+      <div
+        class="testimonios__indicador fade-up"
+        style="--d: 0.28s"
+        role="group"
+        aria-label="Elegir testimonio"
+      >
+        {
+          testimonios.map(({ nombre }, i) => (
+            <button
+              type="button"
+              class="testimonios__punto"
+              aria-label={`Ver testimonio de ${nombre}`}
+              aria-current={i === 0 ? "true" : "false"}
+              data-punto={i}
+            >
+              <span class="testimonios__punto-barra" aria-hidden="true" />
+            </button>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Sin JavaScript: todo visible en su estado inicial -->
+  <noscript>
+    <style is:inline>
+      .testimonios .fade-up {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    </style>
+  </noscript>
+</section>
+
+<script>
+  const seccion = document.querySelector<HTMLElement>("[data-testimonios]");
+  const mqlReducir = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  if (seccion) {
+    // 1. Entrada fade-up una sola vez al aparecer en pantalla
+    if (mqlReducir.matches || !("IntersectionObserver" in window)) {
+      seccion.classList.add("is-visible");
+    } else {
+      const observadorEntrada = new IntersectionObserver(
+        (entradas) => {
+          if (entradas.some((e) => e.isIntersecting)) {
+            seccion.classList.add("is-visible");
+            observadorEntrada.disconnect();
+          }
+        },
+        { threshold: 0.25 },
+      );
+      observadorEntrada.observe(seccion);
+    }
+
+    // 2. Pestañas de escritorio (patrón ARIA + fundido salida/entrada)
+    const tablist = seccion.querySelector<HTMLElement>(
+      "[data-testimonios-tabs]",
+    );
+    const tabs = Array.from(
+      seccion.querySelectorAll<HTMLButtonElement>("[data-tab]"),
+    );
+    const paneles = Array.from(
+      seccion.querySelectorAll<HTMLElement>("[data-panel]"),
+    );
+
+    if (tablist && tabs.length > 0 && paneles.length === tabs.length) {
+      let indiceActivo = 0;
+      let temporizadorCambio: number | undefined;
+      let rafEntrada: number | undefined;
+
+      const limpiarTimers = () => {
+        if (temporizadorCambio !== undefined) {
+          window.clearTimeout(temporizadorCambio);
+          temporizadorCambio = undefined;
+        }
+        if (rafEntrada !== undefined) {
+          window.cancelAnimationFrame(rafEntrada);
+          rafEntrada = undefined;
+        }
+      };
+
+      const activarTab = (nuevoIndice: number, enfocar = false) => {
+        if (nuevoIndice < 0 || nuevoIndice >= tabs.length) return;
+        seccion.classList.add("is-visible");
+
+        if (enfocar) {
+          tabs[nuevoIndice].focus();
+        }
+
+        if (nuevoIndice === indiceActivo) return;
+
+        limpiarTimers();
+
+        tabs.forEach((tab, idx) => {
+          const seleccionado = idx === nuevoIndice;
+          tab.setAttribute("aria-selected", seleccionado ? "true" : "false");
+          tab.tabIndex = seleccionado ? 0 : -1;
+        });
+
+        indiceActivo = nuevoIndice;
+        const panelDestino = paneles[nuevoIndice];
+
+        if (mqlReducir.matches) {
+          paneles.forEach((panel, idx) => {
+            const esDestino = idx === nuevoIndice;
+            panel.dataset.estado = esDestino ? "activo" : "inactivo";
+            panel.setAttribute("aria-hidden", esDestino ? "false" : "true");
+            panel.inert = !esDestino;
+          });
+          return;
+        }
+
+        // Si el usuario vuelve al panel que todavía estaba saliendo, reentra directo
+        if (panelDestino.dataset.estado === "saliendo") {
+          paneles.forEach((panel, idx) => {
+            const esDestino = idx === nuevoIndice;
+            panel.dataset.estado = esDestino ? "activo" : "inactivo";
+            panel.setAttribute("aria-hidden", esDestino ? "false" : "true");
+            panel.inert = !esDestino;
+          });
+          return;
+        }
+
+        // Fase 1: salida del panel visible actual (0.25 s)
+        paneles.forEach((panel) => {
+          if (
+            panel.dataset.estado === "activo" ||
+            panel.dataset.estado === "saliendo"
+          ) {
+            panel.dataset.estado = "saliendo";
+          } else {
+            panel.dataset.estado = "inactivo";
+          }
+          panel.setAttribute("aria-hidden", "true");
+          panel.inert = true;
+        });
+
+        // Fase 2: entrada del nuevo panel (0.35 s)
+        temporizadorCambio = window.setTimeout(() => {
+          temporizadorCambio = undefined;
+
+          paneles.forEach((panel, idx) => {
+            if (idx !== indiceActivo) {
+              panel.dataset.estado = "inactivo";
+              panel.setAttribute("aria-hidden", "true");
+              panel.inert = true;
+            }
+          });
+
+          const destinoActual = paneles[indiceActivo];
+          destinoActual.dataset.estado = "entrando";
+          destinoActual.setAttribute("aria-hidden", "false");
+          destinoActual.inert = false;
+
+          // Forzamos layout para que la transición arranque desde translateY(8px) y opacity 0
+          void destinoActual.offsetWidth;
+
+          rafEntrada = window.requestAnimationFrame(() => {
+            rafEntrada = undefined;
+            destinoActual.dataset.estado = "activo";
+          });
+        }, 250);
+      };
+
+      tabs.forEach((tab, i) => {
+        tab.addEventListener("click", () => activarTab(i));
+      });
+
+      tablist.addEventListener("keydown", (evento) => {
+        const total = tabs.length;
+        let siguiente: number | null = null;
+
+        switch (evento.key) {
+          case "ArrowRight":
+            siguiente = (indiceActivo + 1) % total;
+            break;
+          case "ArrowLeft":
+            siguiente = (indiceActivo - 1 + total) % total;
+            break;
+          case "Home":
+            siguiente = 0;
+            break;
+          case "End":
+            siguiente = total - 1;
+            break;
+          default:
+            return;
+        }
+
+        evento.preventDefault();
+        activarTab(siguiente, true);
+      });
+    }
+
+    // 3. Carrusel celular con scroll-snap e indicador sincronizado
+    const carrusel = seccion.querySelector<HTMLElement>("[data-carrusel]");
+    const diapositivas = Array.from(
+      seccion.querySelectorAll<HTMLElement>("[data-diapositiva]"),
+    );
+    const puntos = Array.from(
+      seccion.querySelectorAll<HTMLButtonElement>("[data-punto]"),
+    );
+
+    if (carrusel && diapositivas.length > 0 && puntos.length === diapositivas.length) {
+      let navegandoPorClick = false;
+      let temporizadorClick: number | undefined;
+
+      const marcarPunto = (indice: number) => {
+        puntos.forEach((punto, idx) => {
+          punto.setAttribute("aria-current", idx === indice ? "true" : "false");
+        });
+      };
+
+      const detectarDiapositivaCercana = () => {
+        const scrollActual = carrusel.scrollLeft;
+        let indiceCercano = 0;
+        let menorDistancia = Infinity;
+
+        diapositivas.forEach((diapo, idx) => {
+          const distancia = Math.abs(diapo.offsetLeft - scrollActual);
+          if (distancia < menorDistancia) {
+            menorDistancia = distancia;
+            indiceCercano = idx;
+          }
+        });
+
+        return indiceCercano;
+      };
+
+      puntos.forEach((punto, i) => {
+        punto.addEventListener("click", () => {
+          navegandoPorClick = !mqlReducir.matches;
+          marcarPunto(i);
+
+          if (temporizadorClick !== undefined) {
+            window.clearTimeout(temporizadorClick);
+          }
+
+          carrusel.scrollTo({
+            left: diapositivas[i].offsetLeft,
+            behavior: mqlReducir.matches ? "auto" : "smooth",
+          });
+
+          if (navegandoPorClick) {
+            temporizadorClick = window.setTimeout(() => {
+              navegandoPorClick = false;
+              temporizadorClick = undefined;
+            }, 600);
+          }
+        });
+      });
+
+      if ("IntersectionObserver" in window) {
+        const observadorCarrusel = new IntersectionObserver(
+          (entradas) => {
+            if (navegandoPorClick) return;
+            for (const entrada of entradas) {
+              if (entrada.isIntersecting) {
+                const indice = Number(
+                  (entrada.target as HTMLElement).dataset.diapositiva,
+                );
+                if (!Number.isNaN(indice)) {
+                  marcarPunto(indice);
+                }
+              }
+            }
+          },
+          { root: carrusel, threshold: 0.6 },
+        );
+
+        diapositivas.forEach((diapo) => observadorCarrusel.observe(diapo));
+      }
+
+      carrusel.addEventListener("scrollend", () => {
+        navegandoPorClick = false;
+        if (temporizadorClick !== undefined) {
+          window.clearTimeout(temporizadorClick);
+          temporizadorClick = undefined;
+        }
+        marcarPunto(detectarDiapositivaCercana());
+      });
+    }
+  }
+</script>
+
+<style>
+  .testimonios {
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 80px clamp(48px, 8.4375vw, 108px);
+    /* Base blanca opaca debajo del degradé para que --celeste-35 no mezcle con el canvas fijo */
+    background-color: var(--blanco);
+    background-image: linear-gradient(
+      180deg,
+      var(--fondo-claro) 0%,
+      var(--celeste-35) 100%
+    );
+    color: var(--azul-noche);
+  }
+
+  .solo-lectores {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .testimonios__interior {
+    width: 100%;
+    max-width: 1064px;
+    margin-inline: auto;
+  }
+
+  .testimonios__comillas {
+    width: 34px;
+    height: 26px;
+    color: var(--azul-noche);
+  }
+
+  /* ── Escritorio ─────────────────────────────────────────────────────── */
+
+  .testimonios__escritorio {
+    margin-top: 50px;
+  }
+
+  .testimonios__escenario {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    row-gap: 49px;
+  }
+
+  .testimonios__panel {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    display: grid;
+    grid-template-rows: subgrid;
+    opacity: 0;
+    transform: translateY(8px);
+    visibility: hidden;
+    pointer-events: none;
+    transition: none;
+  }
+
+  .testimonios__panel[data-estado="activo"] {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+      opacity 0.35s var(--curva-animacion),
+      transform 0.35s var(--curva-animacion);
+  }
+
+  .testimonios__panel[data-estado="saliendo"] {
+    opacity: 0;
+    transform: translateY(8px);
+    visibility: visible;
+    pointer-events: none;
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease;
+  }
+
+  .testimonios__panel[data-estado="entrando"] {
+    opacity: 0;
+    transform: translateY(8px);
+    visibility: visible;
+    pointer-events: none;
+    transition: none;
+  }
+
+  .testimonios__cita {
+    margin: 0;
+    max-width: 1040px;
+    /* 32 px en 820 px → 44 px en 1280 px+ */
+    font-size: clamp(2rem, 0.659rem + 2.614vw, 2.75rem);
+    font-weight: var(--peso-medium);
+    line-height: 1.24;
+    letter-spacing: -0.025em;
+    color: var(--azul-noche);
+  }
+
+  .testimonios__autor {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .testimonios__avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--celeste);
+    font-size: 1.125rem;
+    font-weight: var(--peso-medium);
+    line-height: 1;
+    color: var(--azul-noche);
+  }
+
+  .testimonios__autor-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .testimonios__autor-nombre {
+    font-size: 1.0625rem;
+    font-weight: var(--peso-medium);
+    line-height: 1.24;
+    color: var(--azul-noche);
+  }
+
+  .testimonios__autor-detalle {
+    font-size: 0.9375rem;
+    font-weight: var(--peso-regular);
+    line-height: 1.3;
+    color: var(--texto-secundario);
+  }
+
+  .testimonios__tabs {
+    margin-top: clamp(88px, 12.421875vw, 159px);
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    width: 100%;
+  }
+
+  .testimonios__tab {
+    position: relative;
+    height: 120px;
+    padding: 16px 24px;
+    border: 0;
+    border-radius: 70px;
+    background-color: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+  }
+
+  .testimonios__tab:focus-visible {
+    outline: 2px solid var(--azul-noche);
+    outline-offset: 4px;
+  }
+
+  .testimonios__tab-borde {
+    position: absolute;
+    inset: 0.5px;
+    width: calc(100% - 1px);
+    height: calc(100% - 1px);
+    overflow: visible;
+    pointer-events: none;
+    color: var(--linea);
+    transition: opacity 0.25s ease;
+  }
+
+  .testimonios__tab-nombre {
+    font-size: 1.0625rem;
+    font-weight: var(--peso-medium);
+    line-height: 1.24;
+    color: var(--azul-noche);
+    transition: color 0.25s ease;
+  }
+
+  .testimonios__tab-detalle {
+    font-size: 0.9375rem;
+    font-weight: var(--peso-regular);
+    line-height: 1.3;
+    color: var(--texto-secundario);
+    transition: color 0.25s ease;
+  }
+
+  @media (hover: hover) {
+    .testimonios__tab[aria-selected="false"]:hover {
+      background-color: color-mix(in srgb, var(--blanco) 40%, transparent);
+    }
+  }
+
+  .testimonios__tab[aria-selected="true"] {
+    background-color: var(--azul-noche);
+  }
+
+  .testimonios__tab[aria-selected="true"] .testimonios__tab-borde {
+    opacity: 0;
+  }
+
+  .testimonios__tab[aria-selected="true"] .testimonios__tab-nombre,
+  .testimonios__tab[aria-selected="true"] .testimonios__tab-detalle {
+    color: var(--blanco);
+  }
+
+  /* ── Tablet (640–1023 px; base 834 px — ver tokens.css): pestañas de escritorio ── */
+
+  @media (min-width: 640px) and (max-width: 1023px) {
+    .testimonios {
+      min-height: auto;
+      display: block;
+      padding: 104px var(--margen-x);
+    }
+
+    .testimonios__interior {
+      max-width: none;
+    }
+
+    .testimonios__escritorio {
+      /* Comillas en y = 104 (alto 26) + 40 = cita en y = 170 */
+      margin-top: 40px;
+    }
+
+    .testimonios__escenario {
+      /* Cita (170..304) + 41 = autor en y = 345 */
+      row-gap: 41px;
+    }
+
+    .testimonios__cita {
+      max-width: none;
+      /* 28,6 px en 640 px → 36 px exactos en 834 px → 40 px en 1023 px */
+      font-size: clamp(1.75rem, 0.25rem + 3.84vw, 2.5rem);
+      line-height: 1.24;
+    }
+
+    .testimonios__tabs {
+      /* Autor (345..401) + 72 = pestañas en y = 473; 242 × 104 con 6 px de separación en 834 px */
+      margin-top: 72px;
+      gap: 6px;
+    }
+
+    .testimonios__tab {
+      height: 104px;
+      padding: 14px 16px;
+      border-radius: 52px;
+    }
+
+    .testimonios__tab-borde rect {
+      rx: 51.5;
+      ry: 51.5;
+    }
+
+    .testimonios__tab-detalle {
+      font-size: clamp(0.8125rem, 0.35rem + 0.89vw, 0.9375rem);
+    }
+  }
+
+  /* ── Celular (< 640 px; base 393 px — ver --bp-celular-max en tokens.css) ── */
+
+  .testimonios__celular {
+    display: none;
+  }
+
+  @media (max-width: 639px) {
+    .testimonios {
+      min-height: auto;
+      display: block;
+      padding: 88px var(--margen-x);
+    }
+
+    .testimonios__comillas {
+      width: 26px;
+      height: 20px;
+    }
+
+    .testimonios__escritorio {
+      display: none;
+    }
+
+    .testimonios__celular {
+      display: block;
+      margin-top: 32px;
+    }
+
+    .testimonios__carrusel {
+      position: relative;
+      display: flex;
+      gap: 24px;
+      width: 100%;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .testimonios__carrusel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .testimonios__diapositiva {
+      flex: 0 0 100%;
+      min-width: 0;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .testimonios__celular .testimonios__cita {
+      max-width: none;
+      font-size: 1.75rem;
+      line-height: 1.26;
+      letter-spacing: -0.025em;
+    }
+
+    .testimonios__celular .testimonios__avatar {
+      width: 48px;
+      height: 48px;
+      font-size: 1rem;
+    }
+
+    .testimonios__celular .testimonios__autor-nombre {
+      font-size: 1rem;
+    }
+
+    .testimonios__celular .testimonios__autor-detalle {
+      font-size: 0.875rem;
+    }
+
+    /* Área táctil cómoda sin alterar el alto visual de 8 px ni la separación de 8 px */
+    .testimonios__indicador {
+      margin-top: 44px;
+      margin-left: -4px;
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .testimonios__punto {
+      padding: 14px 4px;
+      margin-block: -14px;
+      border: 0;
+      background: transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .testimonios__punto:focus-visible {
+      outline: none;
+    }
+
+    .testimonios__punto:focus-visible .testimonios__punto-barra {
+      outline: 2px solid var(--azul-noche);
+      outline-offset: 4px;
+    }
+
+    .testimonios__punto-barra {
+      display: block;
+      width: 8px;
+      height: 8px;
+      border-radius: var(--radio-pastilla);
+      background-color: color-mix(in srgb, var(--azul-noche) 25%, transparent);
+      transition:
+        width 0.35s var(--curva-animacion),
+        background-color 0.25s ease;
+    }
+
+    .testimonios__punto[aria-current="true"] .testimonios__punto-barra {
+      width: 28px;
+      background-color: var(--azul-noche);
+    }
+  }
+
+  /* ── Preferencia de movimiento reducido ─────────────────────────────── */
+
+  @media (prefers-reduced-motion: reduce) {
+    .testimonios__panel,
+    .testimonios__panel[data-estado="activo"],
+    .testimonios__panel[data-estado="saliendo"],
+    .testimonios__tab,
+    .testimonios__tab-borde,
+    .testimonios__tab-nombre,
+    .testimonios__tab-detalle,
+    .testimonios__punto-barra {
+      transition: none;
+    }
+
+    .testimonios__carrusel {
+      scroll-behavior: auto;
+    }
+  }
+</style>

@@ -1,0 +1,841 @@
+---
+import { Image } from "astro:assets";
+import pabloFoto from "../assets/images/pablo-brazos-cruzados.png";
+import Boton from "./ui/Boton.astro";
+
+const WHATSAPP_URL =
+  "https://wa.me/5491156426761?text=Hola%20Pablo%2C%20quisiera%20reservar%20un%20turno.";
+
+// TODO: confirmar estadísticas con Pablo
+const estadisticas = [
+  { numero: "+15", etiqueta: "años de experiencia" },
+  { numero: "7", etiqueta: "especialidades" },
+  { numero: "1 a 1", etiqueta: "atención personalizada" },
+];
+---
+
+<section id="inicio" class="hero" data-glow-zona>
+  <!-- Resplandor: canvas chico estirado a pantalla completa, detrás de todo -->
+  <div class="atmo" aria-hidden="true">
+    <canvas width="96" height="60" data-resplandor></canvas>
+  </div>
+
+  <div class="hero__contenedor">
+    <div class="hero__contenido">
+      <h1
+        class="hero__titulo"
+        aria-label="Kinesiología a tu medida, de la lesión al alta"
+        data-revelar
+      >
+        Kinesiología <br class="solo-celular" />
+        <span class="hero__resaltado">a tu medida</span>,<br />
+        de la lesión <br class="solo-celular" />
+        al alta
+      </h1>
+
+      <p class="hero__bajada fade-up" style="--d: 1.15s">
+        Lic. Pablo Gago, Kinesiólogo y Fisiatra.
+      </p>
+
+      <ul class="hero__estadisticas" aria-label="Datos principales">
+        {estadisticas.map(({ numero, etiqueta }, i) => (
+          <li
+            class="hero__estadistica fade-up"
+            style={`--d: ${(1.25 + i * 0.07).toFixed(2)}s`}
+          >
+            <span class="hero__numero">{numero}</span>
+            <span class="hero__etiqueta">{etiqueta}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div class="hero__cta fade-up" style="--d: 1.3s">
+        <Boton
+          texto="Reservar turno"
+          href={WHATSAPP_URL}
+          variante="principal"
+          tamaño="normal"
+        />
+      </div>
+    </div>
+
+    <div class="hero__foto-envoltura fade-up" style="--d: 1.2s">
+      <Image
+        src={pabloFoto}
+        alt="Lic. Pablo Gago, kinesiólogo y fisiatra, vestido con ambo azul y los brazos cruzados"
+        widths={[480, 720, 1040]}
+        sizes="(max-width: 639px) 286px, (max-width: 1023px) 526px, 520px"
+        loading="eager"
+        fetchpriority="high"
+        decoding="sync"
+        class="hero__foto"
+        data-hero-foto
+      />
+    </div>
+  </div>
+
+  <!-- Sin JavaScript: todo visible -->
+  <noscript>
+    <style is:inline>
+      .hero__titulo { visibility: visible !important; }
+      .fade-up { opacity: 1 !important; transform: none !important; }
+      .hero__estadisticas::before { transform: none !important; }
+    </style>
+  </noscript>
+</section>
+
+<script>
+  import {
+    clamp01,
+    leerColor,
+    partirEnLetras,
+    pintarLetras,
+    smoothstep,
+    type PaletaRevelado,
+    type RGB,
+  } from "../scripts/revelar-letras";
+
+  const reducirMovimiento = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+
+  const BLANCO = leerColor("--blanco");
+  const AZUL_SUAVE = leerColor("--azul-suave");
+  const CELESTE = leerColor("--celeste");
+  const AZUL_MARCA = leerColor("--azul-marca");
+  const AZUL_NOCHE = leerColor("--azul-noche");
+  const paletaTitulo: PaletaRevelado = {
+    fantasma: BLANCO,
+    acento: AZUL_MARCA,
+    final: AZUL_NOCHE,
+    resaltado: BLANCO,
+  };
+
+  // =====================================================
+  // Resplandor ("bowl glow")
+  // =====================================================
+  const ANCHO = 96;
+  const ALTO = 60;
+  const RND = 0.25;
+  const PUNTOS = 48;
+  const EXPONENTE = 0.72;
+  const INERCIA = 0.12;
+
+  // Tabla de scroll (q = scrollY / alto de pantalla)
+  const CLAVES_Q = [0, 0.03, 0.08, 0.18, 0.4, 0.66, 0.87, 1.15, 1.43, 1.8];
+  const TABLA_TIP = [0.3, 0.45, 0.65, 0.8, 0.95, 1.05, 1.05, 1.1, 1.3, 2.4];
+  const TABLA_HALF = [0.34, 0.38, 0.38, 0.38, 0.38, 0.46, 0.66, 0.9, 1.6, 3.0];
+  const TABLA_SOFT = [0.22, 0.26, 0.22, 0.22, 0.19, 0.16, 0.13, 0.1, 0.1, 0.1];
+
+  // Intro: arranca apenas carga la página y dura 1.05 s.
+  // Durante los primeros ~0.25 s una máscara en forma de cúpula central deja
+  // nacer el color en las esquinas superiores y lo une en el centro; después
+  // el cuenco baja de forma continua hasta q = 0.
+  const INICIO_INTRO = { tip: -0.3, half: 0.3, soft: 0.1 };
+  const DURACION_INTRO = 1050;
+  const DURACION_CUPULA = 290; // ms hasta cerrar por completo la cúpula central
+
+  type Forma = { tip: number; half: number; soft: number };
+
+  function interpolar(tabla: number[], q: number) {
+    if (q <= CLAVES_Q[0]) return tabla[0];
+    for (let i = 0; i < CLAVES_Q.length - 1; i++) {
+      if (q <= CLAVES_Q[i + 1]) {
+        const f = (q - CLAVES_Q[i]) / (CLAVES_Q[i + 1] - CLAVES_Q[i]);
+        return tabla[i] + (tabla[i + 1] - tabla[i]) * f;
+      }
+    }
+    return tabla[tabla.length - 1];
+  }
+
+  const formaPara = (q: number): Forma => ({
+    tip: interpolar(TABLA_TIP, q),
+    half: interpolar(TABLA_HALF, q),
+    soft: interpolar(TABLA_SOFT, q),
+  });
+
+  const lienzo = document.querySelector<HTMLCanvasElement>("[data-resplandor]");
+  const ctx = lienzo?.getContext("2d") ?? null;
+  const imagen = ctx ? ctx.createImageData(ANCHO, ALTO) : null;
+  const curvaX = new Float64Array(PUNTOS);
+  const curvaY = new Float64Array(PUNTOS);
+
+  // Máscara de cúpula central (∩) con distancia euclidiana y suavizado constante:
+  // separa bien las esquinas del centro superior para que las manchas nazcan con
+  // cuerpo en los extremos mientras el centro sigue blanco puro, y se cierre suave sin picos.
+  function mascaraCupula(nx: number, py: number, progresoCupula: number): number {
+    if (progresoCupula >= 1) return 1;
+    const s = smoothstep(progresoCupula);
+    const softCupula = 0.19;
+    const radio = 0.88 - 1.07 * s; // 0.88 → -0.19 (en -0.19, toda la pantalla queda en 1)
+    const dist = Math.hypot(nx * 1.45, py - 0.28);
+    return smoothstep((dist - radio + softCupula) / (2 * softCupula));
+  }
+
+  function dibujar(
+    tip: number,
+    half: number,
+    soft: number,
+    progresoCupula = 1,
+  ) {
+    if (!ctx || !imagen) return;
+    const aspecto = window.innerWidth / window.innerHeight;
+    const semiancho = half * aspecto;
+    const datos = imagen.data;
+    const usarCupula = progresoCupula < 1;
+    let idx = 0;
+
+    // Mientras tip <= 0, la extensión continua de CX = half·aspect·(1 − yy/tip)^0.72
+    // es una franja horizontal de todo el ancho en y = tip (distancia = py − tip).
+    // Combinada con la máscara de cúpula central, nacen dos manchas en las esquinas
+    // superiores que se unen en el centro antes de abrirse en cuenco.
+    if (tip <= 1e-4) {
+      for (let j = 0; j < ALTO; j++) {
+        const py = (j + 0.5) / ALTO;
+        const d = py - tip;
+        const sd = d - RND;
+        const gBase = 1 - smoothstep((sd + soft) / (2 * soft));
+
+        for (let i = 0; i < ANCHO; i++) {
+          const nx = Math.abs((i + 0.5) / ANCHO - 0.5);
+          const g = usarCupula ? gBase * mascaraCupula(nx, py, progresoCupula) : gBase;
+
+          let a: RGB, b: RGB, k: number;
+          if (g < 0.38) {
+            a = BLANCO;
+            b = AZUL_SUAVE;
+            k = smoothstep(g / 0.38);
+          } else {
+            a = AZUL_SUAVE;
+            b = CELESTE;
+            k = smoothstep((g - 0.38) / 0.62);
+          }
+          datos[idx] = a[0] + (b[0] - a[0]) * k;
+          datos[idx + 1] = a[1] + (b[1] - a[1]) * k;
+          datos[idx + 2] = a[2] + (b[2] - a[2]) * k;
+          datos[idx + 3] = 255;
+          idx += 4;
+        }
+      }
+      ctx.putImageData(imagen, 0, 0);
+      return;
+    }
+
+    // 1. Borde del bowl: 48 puntos con yy de -0.3 a tip
+    for (let k = 0; k < PUNTOS; k++) {
+      const yy = -0.3 + ((tip + 0.3) * k) / (PUNTOS - 1);
+      curvaX[k] = semiancho * Math.pow(Math.max(0, 1 - yy / tip), EXPONENTE);
+      curvaY[k] = yy;
+    }
+
+    for (let j = 0; j < ALTO; j++) {
+      const py = (j + 0.5) / ALTO;
+      const bordeFila =
+        py < tip
+          ? semiancho * Math.pow(Math.max(0, 1 - py / tip), EXPONENTE)
+          : -1;
+
+      for (let i = 0; i < ANCHO; i++) {
+        const nx = Math.abs((i + 0.5) / ANCHO - 0.5);
+        const px = nx * aspecto;
+
+        // 2. Distancia exacta al segmento más cercano de la polilínea
+        let d2 = Infinity;
+        for (let k = 0; k < PUNTOS - 1; k++) {
+          const ax = curvaX[k];
+          const ay = curvaY[k];
+          const dx = curvaX[k + 1] - ax;
+          const dy = curvaY[k + 1] - ay;
+          const largo2 = dx * dx + dy * dy;
+          let u = largo2 > 0 ? ((px - ax) * dx + (py - ay) * dy) / largo2 : 0;
+          u = u < 0 ? 0 : u > 1 ? 1 : u;
+          const ex = ax + u * dx - px;
+          const ey = ay + u * dy - py;
+          const e2 = ex * ex + ey * ey;
+          if (e2 < d2) d2 = e2;
+        }
+        let d = Math.sqrt(d2);
+        if (px < bordeFila) d = -d; // adentro: negativa
+
+        // 3. Redondear el fondo; 4. cantidad de relleno
+        const sd = d - RND;
+        const gBase = 1 - smoothstep((sd + soft) / (2 * soft));
+        const g = usarCupula ? gBase * mascaraCupula(nx, py, progresoCupula) : gBase;
+
+        // 5. Color: blanco → azul suave → celeste
+        let a: RGB, b: RGB, k: number;
+        if (g < 0.38) {
+          a = BLANCO;
+          b = AZUL_SUAVE;
+          k = smoothstep(g / 0.38);
+        } else {
+          a = AZUL_SUAVE;
+          b = CELESTE;
+          k = smoothstep((g - 0.38) / 0.62);
+        }
+        datos[idx] = a[0] + (b[0] - a[0]) * k;
+        datos[idx + 1] = a[1] + (b[1] - a[1]) * k;
+        datos[idx + 2] = a[2] + (b[2] - a[2]) * k;
+        datos[idx + 3] = 255;
+        idx += 4;
+      }
+    }
+    ctx.putImageData(imagen, 0, 0);
+  }
+
+  // =====================================================
+  // Revelado del titular letra por letra
+  // =====================================================
+  const RETRASO_TITULO = 350;
+  const DURACION_TITULO = 1250;
+  const SPREAD_TITULO = 0.35;
+
+  // =====================================================
+  // Orden de arranque
+  // =====================================================
+  const titulo = document.querySelector<HTMLElement>("[data-revelar]");
+
+  if (reducirMovimiento) {
+    // Sin intro: resplandor fijo en q = 0 y titular en sus colores finales
+    const reposo = formaPara(0);
+    dibujar(reposo.tip, reposo.half, reposo.soft);
+    window.addEventListener("resize", () =>
+      dibujar(reposo.tip, reposo.half, reposo.soft),
+    );
+    titulo?.classList.add("is-listo");
+    document.body.classList.add("ready");
+  } else {
+    // 1. Partir el titular, pintarlo en p = 0 y dibujar el estado inicial del canvas (blanco)
+    const letras = titulo ? partirEnLetras(titulo, "hero__resaltado") : [];
+    pintarLetras(letras, 0, SPREAD_TITULO, paletaTitulo, 0);
+    titulo?.classList.add("is-listo");
+    dibujar(INICIO_INTRO.tip, INICIO_INTRO.half, INICIO_INTRO.soft, 0);
+
+    const actual: Forma = { ...INICIO_INTRO };
+    let objetivo = formaPara(0);
+    let inicio = 0;
+    let raf = 0;
+    let zonaVisible = true;
+
+    const hero = document.getElementById("inicio");
+    const foto = document.querySelector<HTMLElement>("[data-hero-foto]");
+    const FIN_SALIDA_FOTO = 0.6;
+    let heroVisible = true;
+    let ultimoFotoQ = 0;
+
+    const sobreMi = document.getElementById("sobre-mi");
+    const visibles = new Set<Element>();
+    let observadorListo = false;
+
+    const actualizarFoto = (q: number) => {
+      if (!foto) return;
+      if (!heroVisible && ultimoFotoQ === FIN_SALIDA_FOTO) return;
+      const fotoQ =
+        Math.round(Math.min(FIN_SALIDA_FOTO, Math.max(0, q)) * 10000) / 10000;
+      if (fotoQ === ultimoFotoQ) return;
+      foto.style.setProperty("--foto-q", String(fotoQ));
+      ultimoFotoQ = fotoQ;
+    };
+
+    const actualizarVisibilidad = () => {
+      const cubierto = sobreMi
+        ? sobreMi.getBoundingClientRect().top <= 0
+        : false;
+      zonaVisible = (!observadorListo || visibles.size > 0) && !cubierto;
+      if (zonaVisible && !raf && inicio) raf = requestAnimationFrame(cuadro);
+    };
+
+    const alScrollear = () => {
+      const q = window.scrollY / (window.innerHeight || 1);
+      objetivo = formaPara(q);
+      actualizarFoto(q);
+      actualizarVisibilidad();
+    };
+
+    const cuadro = (ahora: number) => {
+      const transcurrido = ahora - inicio;
+      const enIntro = transcurrido < DURACION_INTRO;
+      let pesoRespiracion = 1;
+      let progresoCupula = 1;
+
+      if (enIntro) {
+        // Durante la intro cur se asigna directo (sin inercia 0.12).
+        // Primero lleva la franja a ~0 en los primeros 0.25 s para dar cuerpo a las
+        // esquinas mientras se cierra la cúpula, y luego despliega el cuenco hasta q = 0 en 1.05 s.
+        const u = clamp01(transcurrido / DURACION_INTRO);
+        const faseEsquinas = (1 - Math.exp(-13 * u)) / (1 - Math.exp(-13));
+        const faseCuenco = smoothstep(clamp01((u - 0.1) / 0.9));
+        const k = 0.52 * faseEsquinas + 0.48 * faseCuenco;
+        actual.tip = INICIO_INTRO.tip + (objetivo.tip - INICIO_INTRO.tip) * k;
+        actual.half = INICIO_INTRO.half + (objetivo.half - INICIO_INTRO.half) * k;
+        actual.soft = INICIO_INTRO.soft + (objetivo.soft - INICIO_INTRO.soft) * k;
+        progresoCupula = clamp01(transcurrido / DURACION_CUPULA);
+        pesoRespiracion = smoothstep(u);
+      } else {
+        actual.tip += (objetivo.tip - actual.tip) * INERCIA;
+        actual.half += (objetivo.half - actual.half) * INERCIA;
+        actual.soft += (objetivo.soft - actual.soft) * INERCIA;
+      }
+
+      // Respiración lenta en reposo
+      dibujar(
+        actual.tip + Math.sin(ahora * 0.00033 + 1.3) * 0.02 * pesoRespiracion,
+        actual.half + Math.sin(ahora * 0.0005) * 0.015 * pesoRespiracion,
+        actual.soft,
+        progresoCupula,
+      );
+
+      // Pausa cuando el canvas queda tapado por Sobre mí
+      raf = zonaVisible || enIntro ? requestAnimationFrame(cuadro) : 0;
+    };
+
+    const cuadroTitulo = (ahora: number) => {
+      const transcurrido = ahora - inicio;
+      const p = clamp01((transcurrido - RETRASO_TITULO) / DURACION_TITULO);
+      // "a tu medida" pasa a blanco recién cuando el celeste ya llegó detrás del titular
+      const resplandorListo = smoothstep(
+        (transcurrido - DURACION_INTRO * 0.85) / 250,
+      );
+      pintarLetras(letras, p, SPREAD_TITULO, paletaTitulo, resplandorListo);
+      if (p < 1 || resplandorListo < 1) {
+        requestAnimationFrame(cuadroTitulo);
+      }
+    };
+
+    // El canvas se ve mientras el hero o Propuesta estén en pantalla y Sobre mí no cubra todo
+    const zonas = document.querySelectorAll("[data-glow-zona]");
+    const observador = new IntersectionObserver((entradas) => {
+      observadorListo = true;
+      let entroHero = false;
+      entradas.forEach((e) => {
+        if (e.isIntersecting) {
+          visibles.add(e.target);
+          if (e.target === hero) {
+            heroVisible = true;
+            entroHero = true;
+          }
+        } else {
+          visibles.delete(e.target);
+          if (e.target === hero) heroVisible = false;
+        }
+      });
+      if (entroHero) {
+        actualizarFoto(window.scrollY / (window.innerHeight || 1));
+      }
+      actualizarVisibilidad();
+    });
+    zonas.forEach((z) => observador.observe(z));
+
+    // 3. Scroll (passive) y resize actualizan los objetivos del bowl
+    window.addEventListener("scroll", alScrollear, { passive: true });
+    window.addEventListener("resize", alScrollear, { passive: true });
+    alScrollear();
+
+    // 2. Primer cuadro: arrancan los fade-ups, el bowl (sin espera) y el titular (+0.35 s)
+    requestAnimationFrame((ahora) => {
+      inicio = ahora;
+      document.body.classList.add("ready");
+      cuadro(ahora);
+      cuadroTitulo(ahora);
+    });
+  }
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: max(100svh, 640px);
+    overflow: hidden;
+    display: flex;
+    /* Fondo transparente: se ve el resplandor del canvas */
+  }
+
+  /* z-index -1: queda detrás del contenido y debajo de las secciones con
+     fondo propio. */
+  .atmo {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: var(--blanco);
+  }
+
+  .atmo canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    display: block;
+  }
+
+  .hero__contenedor {
+    position: relative;
+    width: 100%;
+    max-width: 1440px;
+    margin-inline: auto;
+    padding: clamp(108px, 17.5vh, 168px) var(--margen-x) max(48px, 8.5vh);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .hero__contenido {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .hero__titulo {
+    font-size: clamp(2.75rem, min(1.54rem + 4.35vw, 9.4vh), 4.875rem);
+    font-weight: var(--peso-medium);
+    line-height: 1.05;
+    letter-spacing: -0.032em;
+    color: var(--azul-noche);
+    max-width: 960px;
+  }
+
+  /* Oculto hasta que el script lo parte en letras (evita un parpadeo) */
+  .hero__titulo[data-revelar]:not(.is-listo) {
+    visibility: hidden;
+  }
+
+  /* Las palabras no se cortan entre líneas */
+  .hero__titulo :global(.palabra) {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .hero__titulo :global(.letra) {
+    display: inline-block;
+  }
+
+  .hero__resaltado {
+    color: var(--blanco);
+  }
+
+  .solo-celular {
+    display: none;
+  }
+
+  .hero__bajada {
+    margin-top: clamp(24px, 5.5vh, 56px);
+    font-size: clamp(1rem, 0.91rem + 0.34vw, 1.1875rem);
+    font-weight: var(--peso-regular);
+    line-height: 1.45;
+    color: var(--azul-noche);
+    max-width: 540px;
+  }
+
+  .hero__estadisticas {
+    position: relative;
+    margin-top: clamp(20px, 4vh, 42px);
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: 576px;
+  }
+
+  /* Línea superior dibujada de izquierda a derecha a partir de 1.2 s */
+  .hero__estadisticas::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: var(--linea);
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  :global(body.ready) .hero__estadisticas::before {
+    animation: hero-linea-x 0.9s var(--curva-animacion) 1.2s forwards;
+  }
+
+  @keyframes hero-linea-x {
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  .hero__estadistica {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: clamp(16px, 2.5vh, 22px);
+    padding-right: 16px;
+    padding-bottom: 10px;
+  }
+
+  .hero__estadistica + .hero__estadistica {
+    border-left: 1px solid var(--linea);
+    padding-left: clamp(14px, 2vw, 24px);
+  }
+
+  .hero__numero {
+    font-size: clamp(1.875rem, 1.38rem + 1.58vw, 2.75rem);
+    font-weight: var(--peso-medium);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    color: var(--azul-noche);
+  }
+
+  .hero__etiqueta {
+    font-size: clamp(0.75rem, 0.7rem + 0.22vw, 0.875rem);
+    font-weight: var(--peso-regular);
+    line-height: 1.3;
+    color: var(--texto-secundario);
+  }
+
+  .hero__cta {
+    margin-top: auto;
+    padding-top: clamp(24px, 4.5vh, 56px);
+  }
+
+  .hero__foto-envoltura {
+    position: absolute;
+    right: clamp(12px, 2.8vw, 44px);
+    bottom: 0;
+    z-index: 1;
+    width: clamp(350px, min(38vw, 58vh), 520px);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .hero__foto {
+    /* --foto-q = scrollY / innerHeight (0..0.6), actualizado desde el listener del resplandor */
+    --foto-q: 0;
+    --foto-mascara: clamp(0, var(--foto-q) / 0.25, 1);
+    --foto-inicio: calc(100% - var(--foto-mascara) * 35%);
+    --foto-fin: calc(102% - min(var(--foto-mascara) * 20%, 2%));
+    --foto-tramo: calc(var(--foto-fin) - var(--foto-inicio));
+    width: 100%;
+    height: auto;
+    opacity: clamp(0, (0.6 - var(--foto-q)) / 0.35, 1);
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      black var(--foto-inicio),
+      rgb(0 0 0 / 0.84) calc(var(--foto-inicio) + var(--foto-tramo) * 0.25),
+      rgb(0 0 0 / 0.5) calc(var(--foto-inicio) + var(--foto-tramo) * 0.5),
+      rgb(0 0 0 / 0.16) calc(var(--foto-inicio) + var(--foto-tramo) * 0.75),
+      transparent var(--foto-fin)
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      black var(--foto-inicio),
+      rgb(0 0 0 / 0.84) calc(var(--foto-inicio) + var(--foto-tramo) * 0.25),
+      rgb(0 0 0 / 0.5) calc(var(--foto-inicio) + var(--foto-tramo) * 0.5),
+      rgb(0 0 0 / 0.16) calc(var(--foto-inicio) + var(--foto-tramo) * 0.75),
+      transparent var(--foto-fin)
+    );
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+
+  /* Entrada fade-up (14 px, 0.9 s) al marcar body.ready */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  :global(body.ready) .fade-up {
+    animation: hero-fade-up 0.9s var(--curva-animacion) forwards;
+    animation-delay: var(--d, 0s);
+  }
+
+  @keyframes hero-fade-up {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Tablet (640–1023 px; base 834 × 1194 — ver tokens.css) */
+  @media (min-width: 640px) and (max-width: 1023px) {
+    .hero {
+      min-height: 100svh;
+    }
+
+    .hero__contenedor {
+      /* 136 px exactos en 834 × 1194 */
+      padding: clamp(104px, 11.39svh, 136px) var(--margen-x) clamp(40px, 5svh, 64px);
+    }
+
+    .hero__contenido {
+      flex: 0 0 auto;
+    }
+
+    .hero__titulo {
+      /* 48 px en 640 px → 64 px exactos en 834 px, siempre en 2 líneas */
+      font-size: clamp(3rem, min(-0.3rem + 8.25vw, 8svh), 4.25rem);
+      line-height: 1.04;
+    }
+
+    .hero__bajada {
+      /* y = 306 en 834 × 1194 */
+      margin-top: clamp(24px, 3.09svh, 37px);
+      font-size: 1.125rem;
+      max-width: 576px;
+    }
+
+    .hero__estadisticas {
+      /* y = 384 en 834 × 1194 */
+      margin-top: clamp(24px, 4.35svh, 52px);
+      max-width: 576px;
+    }
+
+    .hero__numero {
+      font-size: clamp(2.125rem, 0.44rem + 4.44vw, 2.75rem);
+    }
+
+    .hero__etiqueta {
+      /* 13 px en 640 px → 14 px exactos en 834 px+ */
+      font-size: clamp(0.8125rem, 0.6063rem + 0.5155vw, 0.875rem);
+    }
+
+    .hero__cta {
+      /* y = 530 en 834 × 1194, con botón tamaño escritorio (206 × 58) */
+      margin-top: clamp(28px, 3.6svh, 43px);
+      padding-top: 0;
+    }
+
+    .hero__foto-envoltura {
+      /* 526 × 700 en x = 300 en 834 × 1194; acotada por ancho disponible junto al CTA y alto bajo las estadísticas */
+      right: 8px;
+      width: min(
+        526px,
+        calc(100vw - var(--margen-x) - 240px),
+        calc((100svh - clamp(444px, 41.2svh, 492px)) * 0.75)
+      );
+    }
+  }
+
+  /* Tablet horizontal / baja altura (ej. 1023 × 768): foto al costado de estadísticas y botón, como escritorio */
+  @media (min-width: 640px) and (max-width: 1023px) and (max-height: 850px) {
+    .hero__contenedor {
+      padding-top: clamp(96px, 13.5svh, 118px);
+      padding-bottom: clamp(32px, 5.5svh, 48px);
+    }
+
+    .hero__contenido {
+      flex: 1;
+    }
+
+    .hero__titulo {
+      font-size: clamp(2.875rem, min(-0.3rem + 8.25vw, 7.6svh), 3.75rem);
+    }
+
+    .hero__bajada {
+      margin-top: clamp(18px, 3.4svh, 30px);
+      max-width: min(576px, calc(100% - clamp(248px, 32vw, 330px)));
+    }
+
+    .hero__estadisticas {
+      margin-top: clamp(18px, 3.6svh, 32px);
+      max-width: min(576px, calc(100% - clamp(248px, 32vw, 330px)));
+    }
+
+    .hero__cta {
+      margin-top: auto;
+      padding-top: clamp(20px, 3.5svh, 36px);
+    }
+
+    .hero__foto-envoltura {
+      right: 8px;
+      width: clamp(240px, min(35vw, 50svh), 380px);
+    }
+  }
+
+  /* Celular (393 px) */
+  @media (max-width: 639px) {
+    .hero {
+      min-height: max(100svh, 852px);
+    }
+
+    .hero__contenedor {
+      padding: 102px var(--margen-x) 40px;
+    }
+
+    .hero__contenido {
+      flex: 0 0 auto;
+    }
+
+    .hero__titulo {
+      font-size: 2.75rem;
+      line-height: 1.06;
+      letter-spacing: -0.03em;
+    }
+
+    .solo-celular {
+      display: block;
+    }
+
+    .hero__bajada {
+      margin-top: 32px;
+      font-size: 1rem;
+      max-width: 100%;
+    }
+
+    .hero__estadisticas {
+      margin-top: 28px;
+      max-width: 100%;
+    }
+
+    .hero__estadistica {
+      padding-top: 18px;
+      padding-right: 10px;
+      padding-bottom: 8px;
+    }
+
+    .hero__estadistica + .hero__estadistica {
+      padding-left: 14px;
+    }
+
+    .hero__numero {
+      font-size: 1.875rem;
+    }
+
+    .hero__etiqueta {
+      font-size: 0.75rem;
+    }
+
+    .hero__cta {
+      margin-top: 40px;
+      padding-top: 0;
+    }
+
+    .hero__foto-envoltura {
+      right: -32px;
+      bottom: 0;
+      width: min(73vw, 286px);
+    }
+  }
+
+  /* Movimiento reducido: todo visible desde el inicio, sin intro */
+  @media (prefers-reduced-motion: reduce) {
+    .hero__titulo[data-revelar]:not(.is-listo) {
+      visibility: visible;
+    }
+
+    .hero__estadisticas::before,
+    :global(body.ready) .hero__estadisticas::before {
+      transform: none;
+      animation: none;
+    }
+
+    .fade-up,
+    :global(body.ready) .fade-up {
+      opacity: 1;
+      transform: none;
+      animation: none;
+    }
+
+    .hero__foto {
+      -webkit-mask-image: none;
+      mask-image: none;
+      opacity: 1;
+    }
+  }
+</style>

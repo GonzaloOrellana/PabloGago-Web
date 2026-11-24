@@ -1,0 +1,159 @@
+---
+interface Props {
+  texto: string;
+  href: string;
+  variante?: 'principal' | 'invertido';
+  tamaño?: 'normal' | 'mini';
+  class?: string;
+}
+
+const {
+  texto,
+  href,
+  variante = 'principal',
+  tamaño = 'normal',
+  class: className = '',
+} = Astro.props;
+
+const esExterno = /^https?:\/\//i.test(href);
+---
+
+<a
+  href={href}
+  class:list={['boton', `boton--${variante}`, `boton--${tamaño}`, className]}
+  target={esExterno ? '_blank' : undefined}
+  rel={esExterno ? 'noopener' : undefined}
+>
+  <span class="boton__texto">{texto}</span>
+  <span class="boton__circulo" aria-hidden="true">
+    <svg
+      class="boton__icono"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M9 6l6 6-6 6" />
+    </svg>
+  </span>
+</a>
+
+<style>
+  .boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: var(--radio-pastilla);
+    font-weight: var(--peso-regular);
+    line-height: 1;
+    white-space: nowrap;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .boton:hover {
+    opacity: 0.92;
+  }
+
+  .boton:hover .boton__icono {
+    transform: translateX(2px);
+  }
+
+  .boton:focus-visible {
+    outline: 2px solid var(--azul-noche);
+    outline-offset: 3px;
+  }
+
+  /* Variantes */
+  .boton--principal {
+    background-color: var(--azul-noche);
+    color: var(--blanco);
+  }
+
+  .boton--principal .boton__circulo {
+    background-color: var(--blanco);
+    color: var(--azul-noche);
+  }
+
+  .boton--invertido {
+    background-color: var(--blanco);
+    color: var(--azul-noche);
+  }
+
+  .boton--invertido .boton__circulo {
+    background-color: var(--azul-noche);
+    color: var(--blanco);
+  }
+
+  .boton--invertido:focus-visible {
+    outline-color: var(--blanco);
+  }
+
+  /* Tamaños */
+  .boton--normal {
+    height: 58px;
+    padding: 6px 6px 6px 26px;
+    gap: 18px;
+    font-size: 1rem;
+  }
+
+  .boton--normal .boton__circulo {
+    width: 46px;
+    height: 46px;
+  }
+
+  .boton--normal .boton__icono {
+    width: 18px;
+    height: 18px;
+  }
+
+  .boton--mini {
+    min-width: 173px;
+    height: 44px;
+    padding: 5px 5px 5px 18px;
+    gap: 12px;
+    font-size: 0.9375rem;
+  }
+
+  .boton--mini .boton__circulo {
+    width: 34px;
+    height: 34px;
+  }
+
+  .boton--mini .boton__icono {
+    width: 15px;
+    height: 15px;
+  }
+
+  .boton__circulo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .boton__icono {
+    transition: transform 0.2s ease;
+  }
+
+  @media (max-width: 639px) {
+    .boton--normal {
+      height: 46px;
+      padding: 5px 5px 5px 20px;
+      gap: 14px;
+      font-size: 0.9375rem;
+    }
+
+    .boton--normal .boton__circulo {
+      width: 36px;
+      height: 36px;
+    }
+
+    .boton--normal .boton__icono {
+      width: 16px;
+      height: 16px;
+    }
+  }
+</style>
