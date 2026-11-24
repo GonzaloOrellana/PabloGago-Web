@@ -9,6 +9,8 @@ const WHATSAPP_URL =
 const MAPA_ENLACE_URL =
   "https://www.google.com/maps/place/C.+Irigoyen+642,+C1407CAP+CABA/@-34.6338228,-58.5095708,17z";
 
+const CREDITO_URL = "https://www.gonzaorellana.com.ar/";
+
 const anio = new Date().getFullYear();
 
 const navegacion = [
@@ -134,6 +136,51 @@ const horarios = ["Lunes a viernes", "16:00 a 20:00", "Con turno previo"];
           </ul>
         </div>
       </div>
+
+      <div class="footer__iconos fade-up" style="--d: 0.24s">
+        <a
+          href={WHATSAPP_URL}
+          class="footer__icono-enlace"
+          target="_blank"
+          rel="noopener"
+          aria-label="WhatsApp"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            fill="currentColor"
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            aria-hidden="true"
+          >
+            <path
+              d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zM12.05 3.67c4.54 0 8.24 3.7 8.24 8.24 0 4.54-3.7 8.23-8.24 8.23-1.48 0-2.93-.39-4.2-1.14l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24zM17.85 15.97c-.25.7-1.44 1.34-2 1.42-.51.08-1.16.11-1.87-.12-.43-.14-.99-.32-1.7-.63-2.99-1.29-4.94-4.3-5.09-4.5-.15-.2-1.22-1.62-1.22-3.09s.77-2.19 1.05-2.49c.27-.3.6-.37.8-.37.2 0 .4 0 .57.01.18.01.43-.07.67.51.25.6.84 2.06.92 2.21.07.15.12.32.02.52-.1.2-.15.32-.3.5-.15.17-.31.39-.45.52-.15.15-.3.31-.13.61.17.3.77 1.27 1.66 2.06 1.14 1.02 2.1 1.33 2.4 1.48.3.15.47.12.65-.07.17-.2.75-.87.95-1.17.2-.3.4-.25.67-.15.27.1 1.74.82 2.04.97.3.15.5.22.57.35.08.12.08.72-.17 1.42z"
+            ></path>
+          </svg>
+        </a>
+
+        <a
+          href="mailto:licpablogago@hotmail.com"
+          class="footer__icono-enlace"
+          aria-label="Enviar un email"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="2.5" y="4.5" width="19" height="15" rx="2"></rect>
+            <path d="M3.5 6l8.5 6.5L20.5 6"></path>
+          </svg>
+        </a>
+      </div>
     </div>
 
     <div class="footer__inferior fade-up" style="--d: 0.32s">
@@ -144,50 +191,17 @@ const horarios = ["Lunes a viernes", "16:00 a 20:00", "Con turno previo"];
           © {anio} Lic. Pablo Gago.<span class="footer__copyright-extra">{" "}Todos los derechos reservados.</span>
         </p>
 
-        <div class="footer__iconos">
+        <p class="footer__credito">
+          Diseñado y Desarrollado por{" "}
           <a
-            href={WHATSAPP_URL}
-            class="footer__icono-enlace"
+            href={CREDITO_URL}
+            class="footer__credito-enlace"
             target="_blank"
-            rel="noopener"
-            aria-label="WhatsApp"
+            rel="noopener noreferrer"
           >
-            <svg
-              viewBox="0 0 24 24"
-              width="20"
-              height="20"
-              fill="currentColor"
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              aria-hidden="true"
-            >
-              <path
-                d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zM12.05 3.67c4.54 0 8.24 3.7 8.24 8.24 0 4.54-3.7 8.23-8.24 8.23-1.48 0-2.93-.39-4.2-1.14l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24zM17.85 15.97c-.25.7-1.44 1.34-2 1.42-.51.08-1.16.11-1.87-.12-.43-.14-.99-.32-1.7-.63-2.99-1.29-4.94-4.3-5.09-4.5-.15-.2-1.22-1.62-1.22-3.09s.77-2.19 1.05-2.49c.27-.3.6-.37.8-.37.2 0 .4 0 .57.01.18.01.43-.07.67.51.25.6.84 2.06.92 2.21.07.15.12.32.02.52-.1.2-.15.32-.3.5-.15.17-.31.39-.45.52-.15.15-.3.31-.13.61.17.3.77 1.27 1.66 2.06 1.14 1.02 2.1 1.33 2.4 1.48.3.15.47.12.65-.07.17-.2.75-.87.95-1.17.2-.3.4-.25.67-.15.27.1 1.74.82 2.04.97.3.15.5.22.57.35.08.12.08.72-.17 1.42z"
-              ></path>
-            </svg>
+            Gonzalo Orellana
           </a>
-
-          <a
-            href="mailto:licpablogago@hotmail.com"
-            class="footer__icono-enlace"
-            aria-label="Enviar un email"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.75"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <rect x="2.5" y="4.5" width="19" height="15" rx="2"></rect>
-              <path d="M3.5 6l8.5 6.5L20.5 6"></path>
-            </svg>
-          </a>
-        </div>
+        </p>
       </div>
     </div>
   </div>
@@ -265,6 +279,7 @@ const horarios = ["Lunes a viernes", "16:00 a 20:00", "Con turno previo"];
   }
 
   .footer__superior {
+    position: relative;
     display: grid;
     grid-template-columns: 290px minmax(0, 1fr);
     column-gap: 154px;
@@ -332,6 +347,7 @@ const horarios = ["Lunes a viernes", "16:00 a 20:00", "Con turno previo"];
     display: grid;
     grid-template-columns: 160px 240px minmax(140px, 1fr);
     padding-top: 4px;
+    padding-right: 72px;
     align-items: start;
   }
 
@@ -363,7 +379,8 @@ const horarios = ["Lunes a viernes", "16:00 a 20:00", "Con turno previo"];
   }
 
   .footer__enlace:focus-visible,
-  .footer__icono-enlace:focus-visible {
+  .footer__icono-enlace:focus-visible,
+  .footer__credito-enlace:focus-visible {
     outline: 2px solid var(--blanco);
     outline-offset: 3px;
     border-radius: 4px;
@@ -373,6 +390,11 @@ const horarios = ["Lunes a viernes", "16:00 a 20:00", "Con turno previo"];
     .footer__enlace:hover,
     .footer__icono-enlace:hover {
       color: var(--blanco);
+    }
+
+    .footer__credito-enlace:hover {
+      color: var(--blanco);
+      text-decoration-color: var(--blanco);
     }
   }
 
@@ -389,9 +411,10 @@ const horarios = ["Lunes a viernes", "16:00 a 20:00", "Con turno previo"];
   .footer__pie {
     margin-top: 27px;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 12px 24px;
   }
 
   .footer__copyright {
@@ -402,6 +425,9 @@ const horarios = ["Lunes a viernes", "16:00 a 20:00", "Con turno previo"];
   }
 
   .footer__iconos {
+    position: absolute;
+    top: 4px;
+    right: 0;
     display: flex;
     align-items: center;
     gap: 16px;
@@ -416,6 +442,23 @@ const horarios = ["Lunes a viernes", "16:00 a 20:00", "Con turno previo"];
     margin: -6px;
     color: var(--texto-claro-secundario);
     transition: color 0.2s ease;
+  }
+
+  .footer__credito {
+    font-size: 0.875rem;
+    font-weight: var(--peso-regular);
+    line-height: 1.4;
+    color: var(--texto-claro-secundario);
+    text-align: right;
+  }
+
+  .footer__credito-enlace {
+    color: inherit;
+    font-weight: var(--peso-medium);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: color-mix(in srgb, var(--blanco) 35%, transparent);
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
   }
 
   /* ── Escritorio intermedio (980–1259 px): redistribución fluida en 1 fila ── */
@@ -478,6 +521,7 @@ const horarios = ["Lunes a viernes", "16:00 a 20:00", "Con turno previo"];
     .footer__columnas {
       /* En 834 px: Navegación x = 48, Contacto x = 288, Horarios x = 548 */
       padding-top: 0;
+      padding-right: 0;
       grid-template-columns:
         minmax(112px, 216fr)
         minmax(196px, 236fr)
@@ -522,6 +566,7 @@ const horarios = ["Lunes a viernes", "16:00 a 20:00", "Con turno previo"];
 
     .footer__columnas {
       padding-top: 0;
+      padding-right: 0;
       grid-template-columns: minmax(132px, 132fr) minmax(0, 189fr);
       grid-template-rows: auto auto;
       column-gap: 24px;
@@ -559,6 +604,9 @@ const horarios = ["Lunes a viernes", "16:00 a 20:00", "Con turno previo"];
 
     .footer__pie {
       margin-top: 24px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
     }
 
     .footer__copyright {
@@ -568,11 +616,17 @@ const horarios = ["Lunes a viernes", "16:00 a 20:00", "Con turno previo"];
     .footer__copyright-extra {
       display: none;
     }
+
+    .footer__credito {
+      font-size: 0.8125rem;
+      text-align: left;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .footer__enlace,
-    .footer__icono-enlace {
+    .footer__icono-enlace,
+    .footer__credito-enlace {
       transition: none;
     }
   }
