@@ -34,7 +34,7 @@ const estadisticas = [
       </h1>
 
       <p class="hero__bajada fade-up" style="--d: 1.15s">
-        Lic. Pablo Gago, Kinesiólogo y Fisiatra.
+        Lic. Pablo Gago, Kinesiólogo Fisiatra.
       </p>
 
       <ul class="hero__estadisticas" aria-label="Datos principales">
@@ -77,9 +77,16 @@ const estadisticas = [
   <!-- Sin JavaScript: todo visible -->
   <noscript>
     <style is:inline>
-      .hero__titulo { visibility: visible !important; }
-      .fade-up { opacity: 1 !important; transform: none !important; }
-      .hero__estadisticas::before { transform: none !important; }
+      .hero__titulo {
+        visibility: visible !important;
+      }
+      .fade-up {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .hero__estadisticas::before {
+        transform: none !important;
+      }
     </style>
   </noscript>
 </section>
@@ -163,7 +170,11 @@ const estadisticas = [
   // Máscara de cúpula central (∩) con distancia euclidiana y suavizado constante:
   // separa bien las esquinas del centro superior para que las manchas nazcan con
   // cuerpo en los extremos mientras el centro sigue blanco puro, y se cierre suave sin picos.
-  function mascaraCupula(nx: number, py: number, progresoCupula: number): number {
+  function mascaraCupula(
+    nx: number,
+    py: number,
+    progresoCupula: number,
+  ): number {
     if (progresoCupula >= 1) return 1;
     const s = smoothstep(progresoCupula);
     const softCupula = 0.19;
@@ -198,7 +209,9 @@ const estadisticas = [
 
         for (let i = 0; i < ANCHO; i++) {
           const nx = Math.abs((i + 0.5) / ANCHO - 0.5);
-          const g = usarCupula ? gBase * mascaraCupula(nx, py, progresoCupula) : gBase;
+          const g = usarCupula
+            ? gBase * mascaraCupula(nx, py, progresoCupula)
+            : gBase;
 
           let a: RGB, b: RGB, k: number;
           if (g < 0.38) {
@@ -260,7 +273,9 @@ const estadisticas = [
         // 3. Redondear el fondo; 4. cantidad de relleno
         const sd = d - RND;
         const gBase = 1 - smoothstep((sd + soft) / (2 * soft));
-        const g = usarCupula ? gBase * mascaraCupula(nx, py, progresoCupula) : gBase;
+        const g = usarCupula
+          ? gBase * mascaraCupula(nx, py, progresoCupula)
+          : gBase;
 
         // 5. Color: blanco → azul suave → celeste
         let a: RGB, b: RGB, k: number;
@@ -367,8 +382,10 @@ const estadisticas = [
         const faseCuenco = smoothstep(clamp01((u - 0.1) / 0.9));
         const k = 0.52 * faseEsquinas + 0.48 * faseCuenco;
         actual.tip = INICIO_INTRO.tip + (objetivo.tip - INICIO_INTRO.tip) * k;
-        actual.half = INICIO_INTRO.half + (objetivo.half - INICIO_INTRO.half) * k;
-        actual.soft = INICIO_INTRO.soft + (objetivo.soft - INICIO_INTRO.soft) * k;
+        actual.half =
+          INICIO_INTRO.half + (objetivo.half - INICIO_INTRO.half) * k;
+        actual.soft =
+          INICIO_INTRO.soft + (objetivo.soft - INICIO_INTRO.soft) * k;
         progresoCupula = clamp01(transcurrido / DURACION_CUPULA);
         pesoRespiracion = smoothstep(u);
       } else {
@@ -660,7 +677,8 @@ const estadisticas = [
 
     .hero__contenedor {
       /* 136 px exactos en 834 × 1194 */
-      padding: clamp(104px, 11.39svh, 136px) var(--margen-x) clamp(40px, 5svh, 64px);
+      padding: clamp(104px, 11.39svh, 136px) var(--margen-x)
+        clamp(40px, 5svh, 64px);
     }
 
     .hero__contenido {

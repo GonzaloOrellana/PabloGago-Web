@@ -24,23 +24,26 @@ const filas = [
         aria-label="Mi trabajo: que vuelvas a moverte"
         data-sobre-mi-titulo
       >
-        Mi trabajo: que<br class="solo-escritorio" /> vuelvas a moverte
+        Mi trabajo: que
+        <br class="solo-escritorio" /> vuelvas a moverte
       </h2>
 
-      <div class="sobre-mi__linea-h" aria-hidden="true" data-sobre-mi-linea></div>
+      <div
+        class="sobre-mi__linea-h"
+        aria-hidden="true"
+        data-sobre-mi-linea
+      ></div>
 
       <dl class="sobre-mi__filas" data-sobre-mi-filas>
-        {
-          filas.map(({ etiqueta, destacado, resto }) => (
-            <div class="sobre-mi__fila">
-              <dt class="sobre-mi__etiqueta">{etiqueta}</dt>
-              <dd class="sobre-mi__descripcion">
-                <strong class="sobre-mi__destacado">{destacado}</strong>
-                {resto}
-              </dd>
-            </div>
-          ))
-        }
+        {filas.map(({ etiqueta, destacado, resto }) => (
+          <div class="sobre-mi__fila">
+            <dt class="sobre-mi__etiqueta">{etiqueta}</dt>
+            <dd class="sobre-mi__descripcion">
+              <strong class="sobre-mi__destacado">{destacado}</strong>
+              {resto}
+            </dd>
+          </div>
+        ))}
       </dl>
     </div>
   </div>

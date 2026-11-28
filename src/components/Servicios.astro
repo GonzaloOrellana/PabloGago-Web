@@ -46,6 +46,10 @@ const columnaDerecha = [
     nombre: "Método 3 Escuadras",
     descripcion:
       "Un método de reeducación postural con el que trabajo desequilibrios del cuerpo para aliviar dolores de espalda, cuello y articulaciones.",
+    enlace: {
+      href: "https://tresescuadras.com.ar/",
+      texto: "Conocer más sobre el método",
+    },
   },
 ];
 
@@ -70,7 +74,7 @@ const columnas = [
       {
         columnas.map(({ offset, servicios }) => (
           <div class="servicios__columna">
-            {servicios.map(({ id, nombre, descripcion }, i) => {
+            {servicios.map(({ id, nombre, descripcion, enlace }, i) => {
               const botonId = `servicio-boton-${id}`;
               const panelId = `servicio-panel-${id}`;
               const retraso = (0.15 + (offset + i) * 0.07).toFixed(2);
@@ -118,6 +122,30 @@ const columnas = [
                   >
                     <div class="servicios__panel-interior">
                       <p class="servicios__descripcion">{descripcion}</p>
+                      {enlace && (
+                        <a
+                          href={enlace.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="servicios__enlace"
+                        >
+                          <span>{enlace.texto}</span>
+                          <svg
+                            class="servicios__enlace-icono"
+                            viewBox="0 0 16 16"
+                            width="14"
+                            height="14"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                          >
+                            <path d="M4.5 11.5L11.5 4.5M5.5 4.5h6v6" />
+                          </svg>
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -350,6 +378,50 @@ const columnas = [
     color: var(--texto-secundario);
   }
 
+  .servicios__descripcion:has(+ .servicios__enlace) {
+    padding-bottom: 10px;
+  }
+
+  .servicios__enlace {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 18px;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: var(--peso-medium);
+    line-height: var(--interlineado-cuerpo);
+    color: var(--azul-noche);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1px;
+    text-decoration-color: var(--linea);
+    transition:
+      opacity 0.2s ease,
+      text-decoration-color 0.2s ease;
+  }
+
+  .servicios__enlace-icono {
+    flex-shrink: 0;
+    transition: transform 0.2s var(--curva-animacion);
+  }
+
+  @media (hover: hover) {
+    .servicios__enlace:hover {
+      opacity: 0.78;
+      text-decoration-color: var(--azul-noche);
+    }
+
+    .servicios__enlace:hover .servicios__enlace-icono {
+      transform: translate(2px, -2px);
+    }
+  }
+
+  .servicios__enlace:focus-visible {
+    outline: 2px solid var(--azul-noche);
+    outline-offset: 4px;
+  }
+
   /* Tablet (640–1023 px; base 834 px — ver tokens.css): 1 columna con tamaños y paddings de escritorio */
   @media (min-width: 640px) and (max-width: 1023px) {
     .servicios {
@@ -400,13 +472,19 @@ const columnas = [
       padding-right: 0;
       font-size: 0.9375rem;
     }
+
+    .servicios__enlace {
+      font-size: 0.9375rem;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .servicios__nombre,
     .servicios__chevron,
     .servicios__panel,
-    .servicios__item[data-abierto="true"] .servicios__panel {
+    .servicios__item[data-abierto="true"] .servicios__panel,
+    .servicios__enlace,
+    .servicios__enlace-icono {
       transition: none;
     }
   }
